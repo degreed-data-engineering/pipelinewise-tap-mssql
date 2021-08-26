@@ -208,7 +208,7 @@ def discover_catalog(mssql_conn, config):
                     c.table_name,
                     c.column_name,
                     data_type,
-                    character_maximum_length,
+                    case when character_maximum_length = -1 then 65535 else character_maximum_length end as character_maximum_length,
                     numeric_precision,
                     numeric_scale,
                     case when cc.column_name is null then 0 else 1 end
