@@ -26,7 +26,11 @@ import tap_mssql.sync_strategies.common as common
 import tap_mssql.sync_strategies.full_table as full_table
 import tap_mssql.sync_strategies.incremental as incremental
 
-from tap_mssql.connection import connect_with_backoff, MSSQLConnection, get_azure_sql_engine
+from tap_mssql.connection import (
+    connect_with_backoff,
+    MSSQLConnection,
+    get_azure_sql_engine,
+)
 
 
 Column = collections.namedtuple(
@@ -74,7 +78,9 @@ BYTES_FOR_INTEGER_TYPE = {
 
 FLOAT_TYPES = set(["float", "double", "money"])
 
-DATETIME_TYPES = set(["datetime", "timestamp", "date", "time", "smalldatetime"])
+DATETIME_TYPES = set(
+    ["datetime", "datetime2", "timestamp", "date", "time", "smalldatetime"]
+)
 
 VARIANT_TYPES = set(["json"])
 
@@ -120,7 +126,11 @@ def schema_for_column(c):
         result.type = ["null", "object"]
 
     else:
-        result = Schema(None, inclusion="unsupported", description="Unsupported column type",)
+        result = Schema(
+            None,
+            inclusion="unsupported",
+            description="Unsupported column type",
+        )
     return result
 
 
@@ -148,7 +158,9 @@ def discover_catalog(mssql_conn, config):
     filter_dbs_config = config.get("filter_dbs")
 
     if filter_dbs_config:
-        filter_dbs_clause = ",".join(["'{}'".format(db) for db in filter_dbs_config.split(",")])
+        filter_dbs_clause = ",".join(
+            ["'{}'".format(db) for db in filter_dbs_config.split(",")]
+        )
 
         table_schema_clause = "WHERE c.table_schema IN ({})".format(filter_dbs_clause)
     else:
@@ -220,11 +232,14 @@ def discover_catalog(mssql_conn, config):
             rec = column_results.fetchone()
         LOGGER.info("Columns Fetched")
         entries = []
-        for (k, cols) in itertools.groupby(columns, lambda c: (c.table_schema, c.table_name)):
+        for (k, cols) in itertools.groupby(
+            columns, lambda c: (c.table_schema, c.table_name)
+        ):
             cols = list(cols)
             (table_schema, table_name) = k
             schema = Schema(
-                type="object", properties={c.column_name: schema_for_column(c) for c in cols}
+                type="object",
+                properties={c.column_name: schema_for_column(c) for c in cols},
             )
             md = create_column_metadata(cols)
             md_map = metadata.to_map(md)
@@ -296,7 +311,9 @@ def desired_columns(selected, table_schema):
 
     selected_but_nonexistent = selected.difference(all_columns)
     if selected_but_nonexistent:
-        LOGGER.warning("Columns %s were selected but do not exist.", selected_but_nonexistent)
+        LOGGER.warning(
+            "Columns %s were selected but do not exist.", selected_but_nonexistent
+        )
 
     not_selected_but_automatic = automatic.difference(selected)
     if not_selected_but_automatic:
@@ -348,7 +365,9 @@ def resolve_catalog(discovered_catalog, streams_to_sync):
                 table=catalog_entry.table,
                 schema=Schema(
                     type="object",
-                    properties={col: discovered_table.schema.properties[col] for col in columns},
+                    properties={
+                        col: discovered_table.schema.properties[col] for col in columns
+                    },
                 ),
             )
         )
@@ -379,7 +398,9 @@ def get_non_binlog_streams(mssql_conn, catalog, config, state):
     discovered = discover_catalog(mssql_conn, config)
 
     # Filter catalog to include only selected streams
-    selected_streams = list(filter(lambda s: common.stream_is_selected(s), catalog.streams))
+    selected_streams = list(
+        filter(lambda s: common.stream_is_selected(s), catalog.streams)
+    )
     streams_with_state = []
     streams_without_state = []
 
@@ -429,7 +450,9 @@ def get_non_binlog_streams(mssql_conn, catalog, config, state):
 def get_binlog_streams(mssql_conn, catalog, config, state):
     discovered = discover_catalog(mssql_conn, config)
 
-    selected_streams = list(filter(lambda s: common.stream_is_selected(s), catalog.streams))
+    selected_streams = list(
+        filter(lambda s: common.stream_is_selected(s), catalog.streams)
+    )
     binlog_streams = []
 
     for stream in selected_streams:
@@ -457,7 +480,9 @@ def do_sync_incremental(mssql_conn, config, catalog_entry, state, columns):
     md_map = metadata.to_map(catalog_entry.metadata)
     stream_version = common.get_stream_version(catalog_entry.tap_stream_id, state)
     replication_key = md_map.get((), {}).get("replication-key")
-    write_schema_message(catalog_entry=catalog_entry, bookmark_properties=[replication_key])
+    write_schema_message(
+        catalog_entry=catalog_entry, bookmark_properties=[replication_key]
+    )
     LOGGER.info("Schema written")
     incremental.sync_table(mssql_conn, config, catalog_entry, state, columns)
 
@@ -471,7 +496,9 @@ def do_sync_full_table(mssql_conn, config, catalog_entry, state, columns):
 
     stream_version = common.get_stream_version(catalog_entry.tap_stream_id, state)
 
-    full_table.sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version)
+    full_table.sync_table(
+        mssql_conn, config, catalog_entry, state, columns, stream_version
+    )
 
     # Prefer initial_full_table_complete going forward
     singer.clear_bookmark(state, catalog_entry.tap_stream_id, "version")
@@ -490,7 +517,8 @@ def sync_non_binlog_streams(mssql_conn, non_binlog_catalog, config, state):
 
         if not columns:
             LOGGER.warning(
-                "There are no columns selected for stream %s, skipping it.", catalog_entry.stream
+                "There are no columns selected for stream %s, skipping it.",
+                catalog_entry.stream,
             )
             continue
 
@@ -510,7 +538,9 @@ def sync_non_binlog_streams(mssql_conn, non_binlog_catalog, config, state):
             )
             replication_method = "FULL_TABLE"
         if replication_method == "INCREMENTAL" and not primary_keys:
-            LOGGER.info(f"No primary key for {catalog_entry.table}, using full table replication")
+            LOGGER.info(
+                f"No primary key for {catalog_entry.table}, using full table replication"
+            )
             replication_method = "FULL_TABLE"
         LOGGER.info(f"Table {catalog_entry.table} will use {replication_method} sync")
 
@@ -527,7 +557,9 @@ def sync_non_binlog_streams(mssql_conn, non_binlog_catalog, config, state):
                 LOGGER.info(f"syncing {catalog_entry.table} full table")
                 do_sync_full_table(mssql_conn, config, catalog_entry, state, columns)
             else:
-                raise Exception("only INCREMENTAL and FULL TABLE replication methods are supported")
+                raise Exception(
+                    "only INCREMENTAL and FULL TABLE replication methods are supported"
+                )
 
     state = singer.set_currently_syncing(state, None)
     singer.write_message(singer.StateMessage(value=copy.deepcopy(state)))
@@ -544,9 +576,12 @@ def do_sync(mssql_conn, config, catalog, state):
 def log_server_params(mssql_conn):
     with mssql_conn.connect() as open_conn:
         try:
-            row = open_conn.execute("""SELECT @@VERSION as version, @@lock_timeout as lock_wait_timeout""")
+            row = open_conn.execute(
+                """SELECT @@VERSION as version, @@lock_timeout as lock_wait_timeout"""
+            )
             LOGGER.info(
-                "Server Parameters: " + "version: %s, " + "lock_timeout: %s, ", *row.fetchone(),
+                "Server Parameters: " + "version: %s, " + "lock_timeout: %s, ",
+                *row.fetchone(),
             )
         except:
             LOGGER.warning("Encountered error checking server params. Error: (%s) %s")
