@@ -181,7 +181,7 @@ class log_based_sync:
         min_version_out_of_date = min_valid_version > self.current_log_version
 
         if self.initial_full_table_complete == False:
-            self.logger.info("No initial load found, xecuting a full table sync.")
+            self.logger.info("No initial load found, executing a full table sync.")
             return True
 
         elif (
@@ -198,6 +198,7 @@ class log_based_sync:
         "Confirm we have state and run a log based query. This will be larger."
 
         key_properties = common.get_key_properties(self.catalog_entry)
+        LOGGER.info("Charlie %s", self.current_log_version)
         ct_sql_query = self._build_ct_sql_query(key_properties)
         self.logger.info("Executing log-based query: {}".format(ct_sql_query))
         time_extracted = utils.now()
@@ -262,7 +263,7 @@ class log_based_sync:
                     self.current_log_version = row["sys_change_version"]
                     # do more
                     row = results.fetchone()
-
+            LOGGER.info("Delta %s", self.current_log_version)
             singer.write_message(singer.StateMessage(value=copy.deepcopy(self.state)))
 
     def _build_ct_sql_query(self, key_properties):

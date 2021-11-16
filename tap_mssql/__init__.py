@@ -526,6 +526,7 @@ def do_sync_log_based_table(mssql_conn, config, catalog_entry, state, columns):
 
     # create state if none exists
     initial_full_table_complete = log_based.log_based_init_state()
+    LOGGER.info("Alpha %s", log_based.current_log_version)
 
     if not initial_full_table_complete:
         state = singer.write_bookmark(
@@ -544,6 +545,8 @@ def do_sync_log_based_table(mssql_conn, config, catalog_entry, state, columns):
         log_based.state = state
 
     initial_load = log_based.log_based_initial_full_table()
+
+    LOGGER.info("Beta %s", log_based.current_log_version)
 
     if initial_load:
         do_sync_full_table(mssql_conn, config, catalog_entry, state, columns)
