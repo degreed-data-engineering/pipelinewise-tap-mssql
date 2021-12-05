@@ -201,7 +201,7 @@ def discover_catalog(mssql_conn, config):
                         on tc.table_schema = c.table_schema
                         and tc.table_name = c.table_name
                         and tc.constraint_name = c.constraint_name
-                        and tc.constraint_type in ('PRIMARY KEY', 'UNIQUE'))
+                        and tc.constraint_type in ('PRIMARY KEY'))
                 SELECT c.table_schema,
                     c.table_name,
                     c.column_name,
@@ -526,9 +526,9 @@ def do_sync_log_based_table(mssql_conn, config, catalog_entry, state, columns):
 
     # create state if none exists
     initial_full_table_complete = log_based.log_based_init_state()
-    LOGGER.info("Alpha %s", log_based.current_log_version)
 
     if not initial_full_table_complete:
+        # set full_table_complete state to false and current_log_version to current
         state = singer.write_bookmark(
             state,
             catalog_entry.tap_stream_id,
@@ -546,9 +546,8 @@ def do_sync_log_based_table(mssql_conn, config, catalog_entry, state, columns):
 
     initial_load = log_based.log_based_initial_full_table()
 
-    LOGGER.info("Beta %s", log_based.current_log_version)
-
     if initial_load:
+
         do_sync_full_table(mssql_conn, config, catalog_entry, state, columns)
         state = singer.write_bookmark(
             state, catalog_entry.tap_stream_id, "initial_full_table_complete", True
@@ -557,7 +556,7 @@ def do_sync_log_based_table(mssql_conn, config, catalog_entry, state, columns):
             state,
             catalog_entry.tap_stream_id,
             "current_log_version",
-            log_based.current_log_version,
+            log_based.current_log_version,  # when the version is out of date, this doesn't refresh meaning it will get stuck doing this forever
         )
 
     else:

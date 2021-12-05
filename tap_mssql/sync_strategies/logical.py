@@ -165,6 +165,7 @@ class log_based_sync:
         # singer.write_message(singer.StateMessage(value=copy.deepcopy(state)))
 
     def _get_current_log_version(self):
+        """Returns the highest tracked version to date by change tracking. Set as part of the initial load and used if no rows were synced (maybe)"""
         self.logger.info("Getting current change tracking version.")
 
         sql_query = "SELECT current_version = CHANGE_TRACKING_CURRENT_VERSION()"
@@ -198,7 +199,7 @@ class log_based_sync:
         "Confirm we have state and run a log based query. This will be larger."
 
         key_properties = common.get_key_properties(self.catalog_entry)
-        LOGGER.info("Charlie %s", self.current_log_version)
+
         ct_sql_query = self._build_ct_sql_query(key_properties)
         self.logger.info("Executing log-based query: {}".format(ct_sql_query))
         time_extracted = utils.now()
@@ -263,7 +264,7 @@ class log_based_sync:
                     self.current_log_version = row["sys_change_version"]
                     # do more
                     row = results.fetchone()
-            LOGGER.info("Delta %s", self.current_log_version)
+
             singer.write_message(singer.StateMessage(value=copy.deepcopy(self.state)))
 
     def _build_ct_sql_query(self, key_properties):
