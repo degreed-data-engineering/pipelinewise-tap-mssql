@@ -548,8 +548,6 @@ def do_sync_log_based_table(mssql_conn, config, catalog_entry, state, columns):
 
     if initial_load:
         do_sync_full_table(mssql_conn, config, catalog_entry, state, columns)
-        LOGGER.info("Slartibartfast")
-        LOGGER.info(log_based.current_log_version)
         state = singer.write_bookmark(
             state, catalog_entry.tap_stream_id, "initial_full_table_complete", True
         )
@@ -557,7 +555,7 @@ def do_sync_log_based_table(mssql_conn, config, catalog_entry, state, columns):
             state,
             catalog_entry.tap_stream_id,
             "current_log_version",
-            log_based.current_log_version,  # when the version is out of date, this doesn't refresh meaning it will get stuck doing this forever
+            log_based.current_log_version,  # when the version is out of date, this has gotten stuck instead of refreshing the table.
         )
 
     else:
