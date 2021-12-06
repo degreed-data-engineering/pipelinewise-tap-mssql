@@ -62,6 +62,9 @@ STRING_TYPES = set(
         "uniqueidentifier",
         "nvarchar",
         "nchar",
+        "binary",
+        "varbinary",
+        "uniqueidentifier",
     ]
 )
 
