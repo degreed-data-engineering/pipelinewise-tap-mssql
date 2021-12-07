@@ -182,7 +182,11 @@ class log_based_sync:
         self.logger.info(min_valid_version)
         self.logger.info("current_log_version:")
         self.logger.info(self.current_log_version)
-        min_version_out_of_date = min_valid_version > self.current_log_version
+        try:
+            min_version_out_of_date = min_valid_version > self.current_log_version
+        except:
+            # if current log version is null, do a full sync
+            min_version_out_of_date = True
 
         if self.initial_full_table_complete == False:
             self.logger.info("No initial load found, executing a full table sync.")
