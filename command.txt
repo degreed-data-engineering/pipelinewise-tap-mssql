@@ -1,0 +1,1 @@
+pip install . && tap-mssql --config config.json --properties catalog.json --state state.json

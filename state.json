@@ -1,0 +1,13 @@
+{
+    "currently_syncing": null,
+    "bookmarks": {
+        "talent-Types": {
+            "initial_full_table_complete": true,
+            "current_log_version": 25495610
+        },
+        "dbo-Inputs": {
+            "initial_full_table_complete": true,
+            "current_log_version": 25577858
+        }
+    }
+}

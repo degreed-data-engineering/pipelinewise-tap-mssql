@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # pylint: disable=too-many-arguments,duplicate-code,too-many-locals
 
+import codecs
 import copy
 import datetime
 import singer
@@ -113,6 +114,12 @@ def row_to_singer_record(catalog_entry, version, row, columns, time_extracted):
             epoch = datetime.datetime.utcfromtimestamp(0)
             timedelta_from_epoch = epoch + elem
             row_to_persist += (timedelta_from_epoch.isoformat() + "+00:00",)
+
+        elif property_type in ["binary", "varbinary"]:
+            LOGGER.info("aasdfjlkja")
+            LOGGER.info("0x" + str(codecs.encode(elem, "hex_codec")))
+
+            row_to_persist += (elem.decode("latin-1"),)
 
         elif isinstance(elem, bytes):
             # for BIT value, treat 0 as False and anything else as True
