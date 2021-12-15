@@ -274,7 +274,12 @@ class log_based_sync:
                     self.logger.info("***BROSE LOG BASED - catalog_entry:")
                     self.logger.info(self.catalog_entry)
                     self.logger.info("***BROSE LOG BASED - catalog_entry.stream")
+                    self.catalog_entry.stream = 'test'
+                    self.logger.info("***BROSE test update stream")
                     self.logger.info(self.catalog_entry.stream)
+                    self.logger.info("***BROSE catalog update")
+                    self.logger.info(self.catalog_entry) 
+    
                     record_message = common.row_to_singer_record(
                         self.catalog_entry,
                         stream_version,
