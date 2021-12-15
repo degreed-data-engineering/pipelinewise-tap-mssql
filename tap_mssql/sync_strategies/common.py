@@ -11,6 +11,8 @@ import singer.metrics as metrics
 from singer import metadata
 from singer import utils
 
+import pyodbc
+
 LOGGER = singer.get_logger()
 
 
@@ -23,12 +25,14 @@ def escape(string):
         )
     return '"' + string + '"'
 
-def set_schema_mapping(config, stream): 
+
+def set_schema_mapping(config, stream):
     schema_mapping = config.get("include_schemas_in_destination_stream_name")
 
     if schema_mapping:
-        stream = stream.replace('-', '_')
+        stream = stream.replace("-", "_")
     return stream
+
 
 def generate_tap_stream_id(table_schema, table_name):
     return table_schema + "-" + table_name
@@ -91,7 +95,7 @@ def generate_select_sql(catalog_entry, columns):
     escaped_table = escape(catalog_entry.table)
     escaped_columns = [escape(c) for c in columns]
 
-    select_sql = "SELECT {} FROM {}.{}".format(
+    select_sql = "SELECT {} FROM {}.{} where InputKey in (2504052)".format(
         ",".join(escaped_columns), escaped_db, escaped_table
     )
 
@@ -100,7 +104,9 @@ def generate_select_sql(catalog_entry, columns):
     return select_sql
 
 
-def row_to_singer_record(catalog_entry, version, table_stream, row, columns, time_extracted):
+def row_to_singer_record(
+    catalog_entry, version, table_stream, row, columns, time_extracted
+):
     row_to_persist = ()
     md_map = metadata.to_map(catalog_entry.metadata)
     md_map[("properties", "_sdc_deleted_at")] = {
@@ -163,21 +169,52 @@ def whitelist_bookmark_keys(bookmark_key_set, tap_stream_id, state):
         singer.clear_bookmark(state, tap_stream_id, bk)
 
 
+def decode_sketchy_utf16(raw_bytes):
+    s = raw_bytes.decode("utf-16le", "ignore")
+    try:
+        n = s.index("\u0000")
+        s = s[:n]  # respect null terminator
+    except ValueError:
+        pass
+    return s
+
+
 def sync_query(
-    cursor, catalog_entry, state, select_sql, columns, stream_version, table_stream, params
+    cursor,
+    catalog_entry,
+    state,
+    select_sql,
+    columns,
+    stream_version,
+    table_stream,
+    params,
 ):
     replication_key = singer.get_bookmark(
         state, catalog_entry.tap_stream_id, "replication_key"
     )
 
     # query_string = cursor.mogrify(select_sql, params)
-
+    # LOGGER.info("Slartibartfast")
+    # LOGGER.info(type(cursor))
+    # cursor.setencoding("utf-16le")
+    # cursor.setdecoding(pyodbc.SQL_CHAR, encoding="utf-8")
+    # cursor.setdecoding(pyodbc.SQL_WCHAR, encoding="utf-16le")
     time_extracted = utils.now()
     if len(params) == 0:
         results = cursor.execute(select_sql)
     else:
         results = cursor.execute(select_sql, params["replication_key_value"])
-    row = results.fetchone()
+
+    try:
+        row = results.fetchone()
+    except:
+        prev_converter = cursor.connection.get_output_converter(pyodbc.SQL_WVARCHAR)
+        cursor.connection.add_output_converter(
+            pyodbc.SQL_WVARCHAR, decode_sketchy_utf16
+        )
+        row = results.fetchone()
+        cursor.connection.add_output_converter(pyodbc.SQL_WVARCHAR, prev_converter)
+
     rows_saved = 0
 
     database_name = get_database_name(catalog_entry)
@@ -190,7 +227,12 @@ def sync_query(
             counter.increment()
             rows_saved += 1
             record_message = row_to_singer_record(
-                catalog_entry, stream_version, table_stream, row, columns, time_extracted
+                catalog_entry,
+                stream_version,
+                table_stream,
+                row,
+                columns,
+                time_extracted,
             )
             singer.write_message(record_message)
             md_map = metadata.to_map(catalog_entry.metadata)
