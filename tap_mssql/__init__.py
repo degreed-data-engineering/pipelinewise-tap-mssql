@@ -467,7 +467,6 @@ def get_binlog_streams(mssql_conn, catalog, config, state):
 def write_schema_message(catalog_entry, bookmark_properties=[]):
     key_properties = common.get_key_properties(catalog_entry)
 
-    catalog_entry.stream = common.set_schema_mapping(config, catalog_entry.stream) 
     singer.write_message(
         singer.SchemaMessage(
             stream=catalog_entry.stream,
@@ -481,7 +480,8 @@ def write_schema_message(catalog_entry, bookmark_properties=[]):
 def do_sync_incremental(mssql_conn, config, catalog_entry, state, columns):
     md_map = metadata.to_map(catalog_entry.metadata)
     stream_version = common.get_stream_version(catalog_entry.tap_stream_id, state)
-    
+    catalog_entry.stream = common.set_schema_mapping(config, catalog_entry.stream) 
+
     replication_key = md_map.get((), {}).get("replication-key")
     write_schema_message(
         catalog_entry=catalog_entry, bookmark_properties=[replication_key]
@@ -494,6 +494,8 @@ def do_sync_incremental(mssql_conn, config, catalog_entry, state, columns):
 
 def do_sync_full_table(mssql_conn, config, catalog_entry, state, columns):
     key_properties = common.get_key_properties(catalog_entry)
+
+    catalog_entry.stream = common.set_schema_mapping(config, catalog_entry.stream) 
 
     write_schema_message(catalog_entry)
     
@@ -517,6 +519,9 @@ def do_sync_log_based_table(mssql_conn, config, catalog_entry, state, columns):
 
     key_properties = common.get_key_properties(catalog_entry)
     state = singer.set_currently_syncing(state, catalog_entry.tap_stream_id)
+    
+    catalog_entry.stream = common.set_schema_mapping(config, catalog_entry.stream) 
+    
     write_schema_message(catalog_entry)
 
     stream_version = common.get_stream_version(catalog_entry.tap_stream_id, state)
