@@ -269,6 +269,12 @@ class log_based_sync:
                         ordered_row.append(None)
                         
                     table_stream = self.catalog_entry.stream.replace('-', '_')
+                    self.logger.info("***BROSE LOG BASED - config")
+                    self.logger.info(self.config)
+                    self.logger.info("***BROSE LOG BASED - catalog_entry:")
+                    self.logger.info(self.catalog_entry)
+                    self.logger.info("***BROSE LOG BASED - catalog_entry.stream")
+                    self.logger.info(self.catalog_entry.stream)
                     record_message = common.row_to_singer_record(
                         self.catalog_entry,
                         stream_version,
