@@ -47,10 +47,8 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
 
     state_version = singer.get_bookmark(state, catalog_entry.tap_stream_id, "version")
 
-    table_stream = common.set_schema_mapping(config, catalog_entry.stream)
-
     activate_version_message = singer.ActivateVersionMessage(
-        stream=table_stream, version=stream_version
+        stream=catalog_entry.stream, version=stream_version
     )
 
     # For the initial replication, emit an ACTIVATE_VERSION message
@@ -67,7 +65,7 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
         params = {}
 
         common.sync_query(
-            open_conn, catalog_entry, state, select_sql, columns, stream_version, table_stream, params
+            open_conn, catalog_entry, state, select_sql, columns, stream_version, params
         )
 
     # clear max pk value and last pk fetched upon successful sync

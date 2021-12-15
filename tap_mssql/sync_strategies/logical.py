@@ -267,23 +267,12 @@ class log_based_sync:
 
                         desired_columns.append("_sdc_deleted_at")
                         ordered_row.append(None)
-                        
-                    table_stream = self.catalog_entry.stream.replace('-', '_')
-                    self.logger.info("***BROSE LOG BASED - config")
-                    self.logger.info(self.config)
-                    self.logger.info("***BROSE LOG BASED - catalog_entry:")
-                    self.logger.info(self.catalog_entry)
-                    self.logger.info("***BROSE LOG BASED - catalog_entry.stream")
-                    self.catalog_entry.stream = 'test'
-                    self.logger.info("***BROSE test update stream")
-                    self.logger.info(self.catalog_entry.stream)
-                    self.logger.info("***BROSE catalog update")
-                    self.logger.info(self.catalog_entry) 
-    
+                    
+                    self.catalog_entry.stream = common.set_schema_mapping(self.config, self.catalog_entry.stream)
+                    
                     record_message = common.row_to_singer_record(
                         self.catalog_entry,
                         stream_version,
-                        table_stream,
                         ordered_row,
                         desired_columns,
                         time_extracted,
