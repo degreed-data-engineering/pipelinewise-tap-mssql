@@ -46,6 +46,8 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
     )
 
     state_version = singer.get_bookmark(state, catalog_entry.tap_stream_id, "version")
+    
+    catalog_entry.stream = common.set_schema_mapping(config, catalog_entry.stream)
 
     activate_version_message = singer.ActivateVersionMessage(
         stream=catalog_entry.stream, version=stream_version
