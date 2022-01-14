@@ -515,13 +515,17 @@ def do_sync_full_table(mssql_conn, config, catalog_entry, state, columns):
         state, catalog_entry.tap_stream_id, "initial_full_table_complete", True
     )
 
+    LOGGER.debug("do_sync_full_table() complete. State: {}".format(state))
+
     singer.write_message(singer.StateMessage(value=copy.deepcopy(state)))
 
 
 def do_sync_log_based_table(mssql_conn, config, catalog_entry, state, columns):
 
+    LOGGER.debug("=======In do_sync_log_based_table=========")
     key_properties = common.get_key_properties(catalog_entry)
     state = singer.set_currently_syncing(state, catalog_entry.tap_stream_id)
+    LOGGER.debug("state = {}".format(state))
     write_schema_message(config, catalog_entry)
 
     stream_version = common.get_stream_version(catalog_entry.tap_stream_id, state)
@@ -537,7 +541,9 @@ def do_sync_log_based_table(mssql_conn, config, catalog_entry, state, columns):
     # create state if none exists
     initial_full_table_complete = log_based.log_based_init_state()
 
+    LOGGER.debug("initial_full_table_complete? = {}".format(initial_full_table_complete))
     if not initial_full_table_complete:
+        LOGGER.debug("not initial_full_table_complete")
         # set full_table_complete state to false and current_log_version to current
         state = singer.write_bookmark(
             state,
@@ -551,12 +557,14 @@ def do_sync_log_based_table(mssql_conn, config, catalog_entry, state, columns):
             "current_log_version",
             log_based.current_log_version,
         )
+        LOGGER.debug("State Written: state = {}".format(state))
 
         log_based.state = state
 
     initial_load = log_based.log_based_initial_full_table()
 
     if initial_load:
+        LOGGER.debug("Doing Full Table Sync")
         do_sync_full_table(mssql_conn, config, catalog_entry, state, columns)
         state = singer.write_bookmark(
             state, catalog_entry.tap_stream_id, "initial_full_table_complete", True
@@ -568,9 +576,10 @@ def do_sync_log_based_table(mssql_conn, config, catalog_entry, state, columns):
             "current_log_version",
             log_based.current_log_version,  # when the version is out of date, this has gotten stuck instead of refreshing the table.
         )
+        LOGGER.debug("State Modified: State = {}".format(state))
 
     else:
-        LOGGER.info("Continue log-based syncing")
+        logger.info("Continue log-based syncing")
         log_based.execute_log_based_sync()
 
 

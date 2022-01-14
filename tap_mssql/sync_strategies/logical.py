@@ -150,19 +150,26 @@ class log_based_sync:
         initial_full_table_complete = singer.get_bookmark(
             self.state, self.catalog_entry.tap_stream_id, "initial_full_table_complete"
         )
+        self.logger.debug("======In log_based_init_state=========")
 
         if initial_full_table_complete is None:
+            self.logger.debug("====initial_full_table_complete is None====")
             self.logger.info("Setting new current log version from db.")
 
             self.current_log_version = self._get_current_log_version()
+            self.logger.debug("======Setting current_log_version=========")
+            self.logger.debug("current_log_version = {}".format(self.current_log_version))
             self.initial_full_table_complete = False
 
             return False
         else:
+            self.logger.debug("=====initial_full_table_complete is not none=========")
             self.initial_full_table_complete = initial_full_table_complete
             self.current_log_version = singer.get_bookmark(
                 self.state, self.catalog_entry.tap_stream_id, "current_log_version"
             )
+            self.logger.debug("Using current_log_version already here")
+            self.logger.debug("current_log_version = {}".format(self.current_log_version))
             return True
 
         # singer.write_message(singer.StateMessage(value=copy.deepcopy(state)))
@@ -224,6 +231,7 @@ class log_based_sync:
                 f"Expected at least 1 key property column in the config, got {key_properties}."
             )
 
+        self.logger.debug("BUILDING CT_SQL_QUERY")
         ct_sql_query = self._build_ct_sql_query(key_properties)
         self.logger.info("Executing log-based query: {}".format(ct_sql_query))
         time_extracted = utils.now()
@@ -291,7 +299,10 @@ class log_based_sync:
                         "current_log_version",
                         row["sys_change_version"],
                     )
+                    self.logger.debug("State Written: State = {}".format(self.state))
                     self.current_log_version = row["sys_change_version"]
+
+                    self.logger.debug("Writing our Next State (for next record). current_log_version = {}".format(self.current_log_version))
                     # do more
                     row = results.fetchone()
 
