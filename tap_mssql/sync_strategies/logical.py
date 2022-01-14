@@ -150,26 +150,26 @@ class log_based_sync:
         initial_full_table_complete = singer.get_bookmark(
             self.state, self.catalog_entry.tap_stream_id, "initial_full_table_complete"
         )
-        self.logger.debug("======In log_based_init_state=========")
+        self.logger.info("======In log_based_init_state=========")
 
         if initial_full_table_complete is None:
-            self.logger.debug("====initial_full_table_complete is None====")
+            self.logger.info("====initial_full_table_complete is None====")
             self.logger.info("Setting new current log version from db.")
 
             self.current_log_version = self._get_current_log_version()
-            self.logger.debug("======Setting current_log_version=========")
-            self.logger.debug("current_log_version = {}".format(self.current_log_version))
+            self.logger.info("======Setting current_log_version=========")
+            self.logger.info("current_log_version = {}".format(self.current_log_version))
             self.initial_full_table_complete = False
 
             return False
         else:
-            self.logger.debug("=====initial_full_table_complete is not none=========")
+            self.logger.info("=====initial_full_table_complete is not none=========")
             self.initial_full_table_complete = initial_full_table_complete
             self.current_log_version = singer.get_bookmark(
                 self.state, self.catalog_entry.tap_stream_id, "current_log_version"
             )
-            self.logger.debug("Using current_log_version already here")
-            self.logger.debug("current_log_version = {}".format(self.current_log_version))
+            self.logger.info("Using current_log_version already here")
+            self.logger.info("current_log_version = {}".format(self.current_log_version))
             return True
 
         # singer.write_message(singer.StateMessage(value=copy.deepcopy(state)))
@@ -221,7 +221,7 @@ class log_based_sync:
     def execute_log_based_sync(self):
         "Confirm we have state and run a log based query. This will be larger."
 
-        self.logger.debug(f"Catalog Entry: {self.catalog_entry}")
+        self.logger.info(f"Catalog Entry: {self.catalog_entry}")
 
         key_properties = common.get_key_properties(self.catalog_entry)
 
@@ -231,7 +231,7 @@ class log_based_sync:
                 f"Expected at least 1 key property column in the config, got {key_properties}."
             )
 
-        self.logger.debug("BUILDING CT_SQL_QUERY")
+        self.logger.info("BUILDING CT_SQL_QUERY")
         ct_sql_query = self._build_ct_sql_query(key_properties)
         self.logger.info("Executing log-based query: {}".format(ct_sql_query))
         time_extracted = utils.now()
@@ -299,10 +299,10 @@ class log_based_sync:
                         "current_log_version",
                         row["sys_change_version"],
                     )
-                    self.logger.debug("State Written: State = {}".format(self.state))
+                    self.logger.info("State Written: State = {}".format(self.state))
                     self.current_log_version = row["sys_change_version"]
 
-                    self.logger.debug("Writing our Next State (for next record). current_log_version = {}".format(self.current_log_version))
+                    self.logger.info("Writing our Next State (for next record). current_log_version = {}".format(self.current_log_version))
                     # do more
                     row = results.fetchone()
 
@@ -310,6 +310,9 @@ class log_based_sync:
 
             if self.catalog_entry.tap_stream_id == "dbo-InputMetadata":
                 revert_ouput_converter(open_conn, prev_converter)
+
+        # Ensuring state is written by writing once more when log based connector is finished
+        singer.write_message(singer.StateMessage(value=copy.deepcopy(self.state)))
 
     def _build_ct_sql_query(self, key_properties):
         """Using Selected columns, return an SQL query to select updated records from Change Tracking"""
