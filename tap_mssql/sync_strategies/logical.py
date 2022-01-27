@@ -75,8 +75,8 @@ class log_based_sync:
                 database_is_change_tracking_enabled = True
             else:
                 raise Exception(
-                    "Cannot sync stream using log-based replication. Change tracking is not enabled for database: {}"
-                ).format(self.database_name)
+                    "Cannot sync stream using log-based replication. Change tracking is not enabled for database: {}".format(self.database_name)
+                )
 
         return database_is_change_tracking_enabled
 
