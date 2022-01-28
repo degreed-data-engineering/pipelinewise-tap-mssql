@@ -136,8 +136,6 @@ class log_based_sync:
 
             object_id = row["object_id"]
 
-        self.logger.info("Object_Id = {}".format(object_id))
-
         if object_id is None:
             raise Exception("The min valid version for the table was null")
 
