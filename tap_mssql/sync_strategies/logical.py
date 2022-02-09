@@ -186,6 +186,9 @@ class log_based_sync:
         "Determine if we should run a full load of the table or use state."
 
         min_valid_version = self._get_min_valid_version()
+        self.logger.info(f"**PR** current_log_version: {self.current_log_version}")
+        self.logger.info(f"**PR** min_valid_version: {min_valid_version}")
+        self.logger.info(f"**PR** initial_full_table_complete: {self.initial_full_table_complete}")
 
         if (
             self.current_log_version is None or not self.initial_full_table_complete
@@ -197,7 +200,8 @@ class log_based_sync:
             return True
         else:
             min_version_out_of_date = min_valid_version > self.current_log_version
-
+            self.logger.info(f"**PR** min_version_out_of_date: {min_version_out_of_date}")
+            
             if (
                 self.initial_full_table_complete == True
                 and min_version_out_of_date == True
