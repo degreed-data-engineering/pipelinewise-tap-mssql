@@ -201,7 +201,7 @@ class log_based_sync:
         else:
             min_version_out_of_date = min_valid_version > self.current_log_version
             self.logger.info(f"**PR** min_version_out_of_date: {min_version_out_of_date}")
-            
+
             if (
                 self.initial_full_table_complete == True
                 and min_version_out_of_date == True
@@ -209,7 +209,8 @@ class log_based_sync:
                 self.logger.info(
                     "CHANGE_TRACKING_MIN_VALID_VERSION has reported a value greater than current-log-version. Executing a full table sync."
                 )
-                return True
+                self.logger.info("**PR** FULL REFRESH IS HAPPENING WHEN IT SHOULDNT")
+                return False
             else:
                 return False
 
