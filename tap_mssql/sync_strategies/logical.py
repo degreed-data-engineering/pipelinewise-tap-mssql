@@ -107,7 +107,7 @@ class log_based_sync:
         return table_is_change_tracking_enabled  # this should be the table name?
 
     def _get_min_valid_version(self):  # should be per table I think?
-
+            
         self.logger.info("Validating the min_valid_version")
 
         sql_query = "SELECT CHANGE_TRACKING_MIN_VALID_VERSION({}) as min_valid_version"
@@ -184,13 +184,15 @@ class log_based_sync:
 
     def log_based_initial_full_table(self):
         "Determine if we should run a full load of the table or use state."
-
+        current_log_version_tester = self._get_current_log_version()
         min_valid_version = self._get_min_valid_version()
+        self.logger.info(f"**PR** current_log_version_tester: {current_log_version_tester}")
         self.logger.info(f"**PR** current_log_version: {self.current_log_version}")
         self.logger.info(f"**PR** min_valid_version: {min_valid_version}")
         self.logger.info(f"**PR** initial_full_table_complete: {self.initial_full_table_complete}")
 
         if (
+            
             self.current_log_version is None or not self.initial_full_table_complete
         ):  # prevents the operator in the else statement from erroring if None
             self.current_log_version = self._get_current_log_version()
@@ -200,6 +202,8 @@ class log_based_sync:
             self.logger.info("**PR** self.current_log_version is None or not self.initial_full_table_complete")
             return False
         else:
+
+            # 27902571 min_valid_version   >    25880517 current_log_version
             min_version_out_of_date = min_valid_version > self.current_log_version
             self.logger.info(f"**PR** min_version_out_of_date: {min_version_out_of_date}")
 
