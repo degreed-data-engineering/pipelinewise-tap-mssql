@@ -202,7 +202,8 @@ class log_based_sync:
             self.logger.info("**PR** self.current_log_version is None or not self.initial_full_table_complete")
             return False
         else:
-
+             
+            self.current_log_version = self._get_current_log_version()   
             # 27902571 min_valid_version   >    25880517 current_log_version
             min_version_out_of_date = min_valid_version > self.current_log_version
             self.logger.info(f"**PR** min_version_out_of_date: {min_version_out_of_date}")
@@ -218,6 +219,9 @@ class log_based_sync:
                 self.logger.info("**PR** self.initial_full_table_complete == True and min_version_out_of_date == True")
                 return False
             else:
+                self.logger.info(
+                    "**PR** THIS IS THE FALSE WE NEED"
+                )
                 return False
 
     def execute_log_based_sync(self):
