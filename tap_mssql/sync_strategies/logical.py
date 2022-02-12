@@ -208,11 +208,12 @@ class log_based_sync:
                 self.initial_full_table_complete == True
                 and min_version_out_of_date == True
             ):
-                if self.current_log_version is None:
+                if self.current_log_version is not None:
                     self.logger.info(
                         "**PR** CHANGE_TRACKING_MIN_VALID_VERSION has reported a value greater than current-log-version. Executing a full table sync."
                     )
-                    return False # True 
+                    self.current_log_version = self._get_current_log_version()
+                    return True # True 
                 else:
                     self.current_log_version = self._get_current_log_version()
                     self.logger.info(
@@ -221,8 +222,9 @@ class log_based_sync:
                     self.logger.info(f"**PR** UPDATE STATE min_valid_version: {min_valid_version}")
                     self.logger.info(f"**PR** UPDATE STATE current_log_version: {self.current_log_version}")
 
-                    return False # False
+                    return True # False
             else:
+
                 return False # False
 
     def execute_log_based_sync(self):
@@ -258,9 +260,8 @@ class log_based_sync:
                 counter.tags["database"] = self.database_name
                 counter.tags["table"] = self.table_name
 
-                self.logger.info("**PR** ROW:")
-                self.logger.info(row)
                 while row:
+
                     counter.increment()
                     desired_columns = []
                     ordered_row = []
