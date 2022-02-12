@@ -537,6 +537,8 @@ def do_sync_log_based_table(mssql_conn, config, catalog_entry, state, columns):
     # create state if none exists
     initial_full_table_complete = log_based.log_based_init_state()
 
+    logger.info('**PR** TESTER: log_based.current_log_version')
+    logger.info(log_based.current_log_version)
     if not initial_full_table_complete:
         # set full_table_complete state to false and current_log_version to current
         state = singer.write_bookmark(
@@ -545,6 +547,14 @@ def do_sync_log_based_table(mssql_conn, config, catalog_entry, state, columns):
             "initial_full_table_complete",
             log_based.initial_full_table_complete,
         )
+        state = singer.write_bookmark(
+            state,
+            catalog_entry.tap_stream_id,
+            "current_log_version",
+            log_based.current_log_version,
+        )
+    else:
+        logger.info('**PR** TESTER: New ELSE statement')
         state = singer.write_bookmark(
             state,
             catalog_entry.tap_stream_id,
@@ -561,6 +571,7 @@ def do_sync_log_based_table(mssql_conn, config, catalog_entry, state, columns):
         state = singer.write_bookmark(
             state, catalog_entry.tap_stream_id, "initial_full_table_complete", True
         )
+
 
         state = singer.write_bookmark(
             state,
