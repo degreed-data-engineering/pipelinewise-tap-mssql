@@ -161,6 +161,8 @@ class log_based_sync:
             self.current_log_version = singer.get_bookmark(
                 self.state, self.catalog_entry.tap_stream_id, "current_log_version"
             )
+            self.logger.info('**PR** TESTER: SELF.CURRENT_LOG_VERSION')
+            self.logger.info(self.current_log_version)
             return True
 
         # singer.write_message(singer.StateMessage(value=copy.deepcopy(state)))
