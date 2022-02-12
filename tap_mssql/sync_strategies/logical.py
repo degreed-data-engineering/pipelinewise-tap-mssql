@@ -190,6 +190,7 @@ class log_based_sync:
 
         min_valid_version = self._get_min_valid_version()
 
+        self.logger.info(f'**PR** TESTER: min_valid_version {min_valid_version}')
         if (
             self.current_log_version is None or not self.initial_full_table_complete
         ):  # prevents the operator in the else statement from erroring if None
