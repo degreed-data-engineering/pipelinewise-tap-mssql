@@ -225,13 +225,6 @@ class log_based_sync:
             else:
                 return False # False
 
-
-
-
-
-
- 
-
     def execute_log_based_sync(self):
         "Confirm we have state and run a log based query. This will be larger."
 
@@ -260,11 +253,13 @@ class log_based_sync:
 
             row = results.fetchone()
             rows_saved = 0
-
+        
             with metrics.record_counter(None) as counter:
                 counter.tags["database"] = self.database_name
                 counter.tags["table"] = self.table_name
 
+                self.logger.info("**PR** ROW:")
+                self.logger.info(row)
                 while row:
                     counter.increment()
                     desired_columns = []
