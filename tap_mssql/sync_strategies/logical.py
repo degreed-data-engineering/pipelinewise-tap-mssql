@@ -214,51 +214,6 @@ class log_based_sync:
             else:
                 return False
 
-    def log_based_initial_full_table(self):
-        "Determine if we should run a full load of the table or use state."
-
-        current_log_version_tester = self._get_current_log_version()
-        min_valid_version = self._get_min_valid_version()
-        self.logger.info(f"**PR** current_log_version_tester: {current_log_version_tester}")
-        self.logger.info(f"**PR** current_log_version: {self.current_log_version}")
-        self.logger.info(f"**PR** min_valid_version: {min_valid_version}")
-        self.logger.info(f"**PR** initial_full_table_complete: {self.initial_full_table_complete}")
-
-
-        if (
-            self.current_log_version is None or not self.initial_full_table_complete
-        ):  # prevents the operator in the else statement from erroring if None
-            self.current_log_version = self._get_current_log_version()
-            self.logger.info(
-                "No previous valid state found, executing a full table sync."
-            )
-            return True
-        else:
-            min_version_out_of_date = min_valid_version > self.current_log_version
-
-            if (
-                self.initial_full_table_complete == True
-                and min_version_out_of_date == True
-            ):
-                if self.current_log_version is not None:
-                    self.logger.info(
-                        "**PR** CHANGE_TRACKING_MIN_VALID_VERSION has reported a value greater than current-log-version. Executing a full table sync."
-                    )
-                    self.current_log_version = self._get_current_log_version()
-                    return True # True 
-                else:
-                    self.current_log_version = self._get_current_log_version()
-                    self.logger.info(
-                        "**PR** Does not need a full sync...update state here with actual current_log_version"
-                    )
-                    self.logger.info(f"**PR** UPDATE STATE min_valid_version: {min_valid_version}")
-                    self.logger.info(f"**PR** UPDATE STATE current_log_version: {self.current_log_version}")
-
-                    return True # False
-            else:
-
-                return False # False
-
     def execute_log_based_sync(self):
         "Confirm we have state and run a log based query. This will be larger."
 
