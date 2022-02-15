@@ -205,6 +205,7 @@ class log_based_sync:
                 self.logger.info(
                     "CHANGE_TRACKING_MIN_VALID_VERSION has reported a value greater than current-log-version. Executing a full table sync."
                 )
+                self.current_log_version = self._get_current_log_version()
                 return True
             else:
                 return False
