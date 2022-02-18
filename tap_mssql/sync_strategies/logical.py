@@ -190,6 +190,7 @@ class log_based_sync:
         if (
             self.current_log_version is None or not self.initial_full_table_complete
         ):  # prevents the operator in the else statement from erroring if None
+            self.logger.info("**PR: Line 193 - Capturing new current_log_version")
             self.current_log_version = self._get_current_log_version()
             self.logger.info(
                 "No previous valid state found, executing a full table sync."
@@ -198,6 +199,7 @@ class log_based_sync:
         else:
             min_version_out_of_date = min_valid_version > self.current_log_version
 
+            self.logger.info("**PR: Line 202 - ** Capturing new current_log_version")
             self.current_log_version = self._get_current_log_version()
             if (
                 self.initial_full_table_complete == True
