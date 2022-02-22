@@ -297,7 +297,7 @@ class log_based_sync:
                     # do more
                     row = results.fetchone()
 
-                if not rows_updated:
+                if not rows_updated: # updates the state if no new records have been added
                     self.current_log_version = self._get_current_log_version() 
                     self.state = singer.write_bookmark(
                         self.state,
