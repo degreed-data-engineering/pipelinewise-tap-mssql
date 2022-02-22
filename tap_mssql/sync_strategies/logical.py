@@ -240,10 +240,11 @@ class log_based_sync:
             rows_saved = 0
 
             with metrics.record_counter(None) as counter:
-                rows_updated = False
                 counter.tags["database"] = self.database_name
                 counter.tags["table"] = self.table_name
 
+                rows_updated = False # Checks to see if there are any new records.  If not then records state below
+                
                 while row:
                     rows_updated = True
                     counter.increment()
@@ -310,11 +311,6 @@ class log_based_sync:
             if self.catalog_entry.tap_stream_id == "dbo-InputMetadata":
                 revert_ouput_converter(open_conn, prev_converter)
         
-
-        self.logger.info("**PR** CONFIRMING CURRENT_LOG_VERSION")
-        self.logger.info(self.catalog_entry.tap_stream_id)
-        self.logger.info(self._get_current_log_version())
-
     def _build_ct_sql_query(self, key_properties):
         """Using Selected columns, return an SQL query to select updated records from Change Tracking"""
         # Order column list in alphabetical order starting with key_properties then other columns
