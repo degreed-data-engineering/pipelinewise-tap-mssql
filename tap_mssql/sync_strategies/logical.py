@@ -157,7 +157,6 @@ class log_based_sync:
 
             return False
         else:
-
             self.current_log_version = self._get_current_log_version()
             self.initial_full_table_complete = initial_full_table_complete
             self.current_log_version = singer.get_bookmark(
@@ -210,6 +209,7 @@ class log_based_sync:
                 self.current_log_version = self._get_current_log_version()
                 return True
             else:
+                self.current_log_version = self._get_current_log_version()
                 return False
 
     def execute_log_based_sync(self):
