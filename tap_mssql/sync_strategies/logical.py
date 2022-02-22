@@ -238,8 +238,9 @@ class log_based_sync:
             results = open_conn.execute(ct_sql_query)
 
             row = results.fetchone()
+
+            rows_updated = False
             with metrics.record_counter(None) as counter:
-                rows_updated = False
                 counter.tags["database"] = self.database_name
                 counter.tags["table"] = self.table_name
 
@@ -295,14 +296,14 @@ class log_based_sync:
                     # do more
                     row = results.fetchone()
 
-                if not rows_updated:
-                    self.current_log_version = self._get_current_log_version() 
-                    self.state = singer.write_bookmark(
-                        self.state,
-                        self.catalog_entry.tap_stream_id,
-                        "current_log_version",
-                        self.current_log_version,
-                    ) 
+            if not rows_updated:
+                self.current_log_version = self._get_current_log_version() 
+                self.state = singer.write_bookmark(
+                    self.state,
+                    self.catalog_entry.tap_stream_id,
+                    "current_log_version",
+                    self.current_log_version,
+                ) 
 
             singer.write_message(singer.StateMessage(value=copy.deepcopy(self.state)))
 
