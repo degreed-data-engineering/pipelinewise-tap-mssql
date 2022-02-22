@@ -243,12 +243,8 @@ class log_based_sync:
                 counter.tags["database"] = self.database_name
                 counter.tags["table"] = self.table_name
 
-                self.logger.info("**PR LINE 253")
-                self.logger.info(row) 
                 while row:
-                    rows_updated = True 
-                    self.logger.info("**PR LINE 256 ROW")
-                    self.logger.info(row) 
+                    rows_updated = True
                     counter.increment()
                     desired_columns = []
                     ordered_row = []
@@ -300,7 +296,6 @@ class log_based_sync:
                     row = results.fetchone()
 
                 if not rows_updated:
-                    self.logger.info("**PR LINE310...no rows updated at all")
                     self.current_log_version = self._get_current_log_version() 
                     self.state = singer.write_bookmark(
                         self.state,
