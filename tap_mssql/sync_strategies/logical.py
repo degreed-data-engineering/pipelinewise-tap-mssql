@@ -157,6 +157,8 @@ class log_based_sync:
 
             return False
         else:
+
+            self.current_log_version = self._get_current_log_version()
             self.initial_full_table_complete = initial_full_table_complete
             self.current_log_version = singer.get_bookmark(
                 self.state, self.catalog_entry.tap_stream_id, "current_log_version"
@@ -190,7 +192,6 @@ class log_based_sync:
         if (
             self.current_log_version is None or not self.initial_full_table_complete
         ):  # prevents the operator in the else statement from erroring if None
-            self.logger.info("**PR: Line 193 - Capturing new current_log_version")
             self.current_log_version = self._get_current_log_version()
             self.logger.info(
                 "No previous valid state found, executing a full table sync."
@@ -199,8 +200,6 @@ class log_based_sync:
         else:
             min_version_out_of_date = min_valid_version > self.current_log_version
 
-            self.logger.info("**PR: Line 202 - ** Capturing new current_log_version")
-            self.current_log_version = self._get_current_log_version()
             if (
                 self.initial_full_table_complete == True
                 and min_version_out_of_date == True
@@ -208,8 +207,9 @@ class log_based_sync:
                 self.logger.info(
                     "CHANGE_TRACKING_MIN_VALID_VERSION has reported a value greater than current-log-version. Executing a full table sync."
                 )
+                self.current_log_version = self._get_current_log_version()
                 return True
-            else: 
+            else:
                 return False
 
     def execute_log_based_sync(self):
