@@ -301,12 +301,13 @@ class log_based_sync:
 
                 if not rows_updated:
                     self.logger.info("**PR LINE310...no rows updated at all")
+                    self.current_log_version = self._get_current_log_version() 
                     self.state = singer.write_bookmark(
-                        state,
-                        catalog_entry.tap_stream_id,
+                        self.state,
+                        self.catalog_entry.tap_stream_id,
                         "current_log_version",
-                        self._get_current_log_version(),
-                    )
+                        self.current_log_version,
+                    ) 
 
             singer.write_message(singer.StateMessage(value=copy.deepcopy(self.state)))
 
