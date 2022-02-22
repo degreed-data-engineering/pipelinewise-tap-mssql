@@ -209,7 +209,6 @@ class log_based_sync:
                 self.current_log_version = self._get_current_log_version()
                 return True
             else:
-                self.current_log_version = self._get_current_log_version()
                 return False
 
     def execute_log_based_sync(self):
@@ -246,10 +245,14 @@ class log_based_sync:
             self.logger.info("**PR LINE26")
             self.logger.info(metrics.record_counter)
             with metrics.record_counter(None) as counter:
+                self.logger.info("**PR COUNTER")
+                self.logger.info(counter) 
                 counter.tags["database"] = self.database_name
                 counter.tags["table"] = self.table_name
 
                 while row:
+                    self.logger.info("**PR ROW")
+                    self.logger.info(row) 
                     counter.increment()
                     desired_columns = []
                     ordered_row = []
