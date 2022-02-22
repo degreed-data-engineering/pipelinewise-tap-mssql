@@ -309,6 +309,11 @@ class log_based_sync:
 
             if self.catalog_entry.tap_stream_id == "dbo-InputMetadata":
                 revert_ouput_converter(open_conn, prev_converter)
+        
+
+        self.logger.info("**PR** CONFIRMING CURRENT_LOG_VERSION")
+        self.logger.info(self.catalog_entry.tap_stream_id)
+        self.logger.info(self._get_current_log_version())
 
     def _build_ct_sql_query(self, key_properties):
         """Using Selected columns, return an SQL query to select updated records from Change Tracking"""
