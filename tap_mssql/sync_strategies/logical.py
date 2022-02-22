@@ -238,8 +238,8 @@ class log_based_sync:
             results = open_conn.execute(ct_sql_query)
 
             row = results.fetchone()
-            rows_updated = False
             with metrics.record_counter(None) as counter:
+                rows_updated = False
                 counter.tags["database"] = self.database_name
                 counter.tags["table"] = self.table_name
 
