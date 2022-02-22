@@ -157,7 +157,6 @@ class log_based_sync:
 
             return False
         else:
-            self.current_log_version = self._get_current_log_version()
             self.initial_full_table_complete = initial_full_table_complete
             self.current_log_version = singer.get_bookmark(
                 self.state, self.catalog_entry.tap_stream_id, "current_log_version"
@@ -234,11 +233,12 @@ class log_based_sync:
 
             if self.catalog_entry.tap_stream_id == "dbo-InputMetadata":
                 prev_converter = modify_ouput_converter(open_conn)
-
+ 
             results = open_conn.execute(ct_sql_query)
-            rows_saved = 0
 
             row = results.fetchone()
+            rows_saved = 0
+
             with metrics.record_counter(None) as counter:
                 rows_updated = False
                 counter.tags["database"] = self.database_name
