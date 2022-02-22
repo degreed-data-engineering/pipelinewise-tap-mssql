@@ -241,6 +241,10 @@ class log_based_sync:
             row = results.fetchone()
             rows_saved = 0
 
+            self.logger.info("**PR LINE244 METRICS")
+            self.logger.info(metrics)
+            self.logger.info("**PR LINE26")
+            self.logger.info(metrics.record_counter)
             with metrics.record_counter(None) as counter:
                 counter.tags["database"] = self.database_name
                 counter.tags["table"] = self.table_name
