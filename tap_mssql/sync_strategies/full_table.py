@@ -74,6 +74,13 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
 
         LOGGER.info("**PR** LINE 75 SELECT_SQL")
         LOGGER.info(select_sql)
+
+        LOGGER.info("**PR** LINE 78 columns")
+        LOGGER.info(columns)
+
+        LOGGER.info("**PR** LINE 81 params")
+        LOGGER.info(params)
+ 
         common.sync_query(
             open_conn,
             catalog_entry,
