@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # pylint: disable=too-many-arguments,duplicate-code,too-many-locals
 
+from ast import Num
 import copy
 import datetime
 import multiprocessing 
@@ -197,15 +198,17 @@ def sync_query(
     row = results.fetchone()
     rows_saved = 0
     
-    many = results.fetchmany(1000)
-
-    # with multiprocessing.pool.Pool(process = 4) as pool:
-    #     result = pool.map(search_database_for_match, [for chunk in chunks(SEARCH_IDS,999)])
+    many = results.fetchmany(10000)
+    number_of_rows = many.rowcount
+    
+    LOGGER.info("**PR** LINE 204 rowcount")
+    LOGGER.info(number_of_rows)
+    #row = results.fetchall()
 
     
     # LOGGER.info("**PR** LINE 200 row")
     # LOGGER.info(row)
-    LOGGER.info("**PR** LINE 208 row")
+    LOGGER.info("**PR** LINE 211 ")
     LOGGER.info(many)
 
     database_name = get_database_name(catalog_entry)
