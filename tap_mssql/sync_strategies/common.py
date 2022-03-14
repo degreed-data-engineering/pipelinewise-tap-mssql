@@ -95,10 +95,19 @@ def generate_select_sql(catalog_entry, columns):
     escaped_table = escape(catalog_entry.table)
     escaped_columns = [escape(c) for c in columns]
 
-    select_sql = "SELECT {} FROM {}.{}".format(
-        ",".join(escaped_columns), escaped_db, escaped_table
-    )
 
+    # select_sql = "SELECT {} FROM {}.{}".format(
+    #     ",".join(escaped_columns), escaped_db, escaped_table
+    # )
+
+    select_sql = """SELECT {}
+    ,SYSUTCDATETIME() AS _SDC_EXTRACTED_AT
+    ,SYSUTCDATETIME() AS _SDC_BATCHED_AT
+    ,null AS _SDC_DELETED_AT
+    FROM `{}`.`{}`
+    """.format(
+    ",".join(escaped_columns), escaped_db, escaped_table
+    
     # escape percent signs
     select_sql = select_sql.replace("%", "%%")
     return select_sql
@@ -183,6 +192,24 @@ def sync_query(
         state, catalog_entry.tap_stream_id, "replication_key"
     )
 
+
+
+
+ 
+    sql = """SELECT {}
+    ,CONVERT_TZ( NOW(),@@session.time_zone,'+00:00') AS _SDC_EXTRACTED_AT
+    ,CONVERT_TZ( NOW(),@@session.time_zone,'+00:00') AS _SDC_BATCHED_AT
+    ,null AS _SDC_DELETED_AT
+    FROM `{}`.`{}`
+    """.format(
+        ','.join(column_safe_sql_values),
+        table_dict['schema_name'],
+        table_dict['table_name'],
+    )
+    export_batch_rows = self.connection_config['export_batch_rows']
+    exported_rows = 0
+
+
     # query_string = cursor.mogrify(select_sql, params)
 
     time_extracted = utils.now()
@@ -195,21 +222,22 @@ def sync_query(
         results = cursor.execute(select_sql, params["replication_key_value"])
         LOGGER.info("**PR** LINE 194 results")
         LOGGER.info(results)
-    row = results.fetchone()
+
+    row = results.fetchall()
+    number_of_rows = len(row)
+
     rows_saved = 0
+     
     
-    many = results.fetchmany(10000)
-    number_of_rows = many.rowcount
-    
-    LOGGER.info("**PR** LINE 204 rowcount")
-    LOGGER.info(number_of_rows)
+    LOGGER.info("**PR** LINE 204 row")
+    LOGGER.info(row)
     #row = results.fetchall()
 
     
     # LOGGER.info("**PR** LINE 200 row")
     # LOGGER.info(row)
-    LOGGER.info("**PR** LINE 211 ")
-    LOGGER.info(many)
+    LOGGER.info("**PR** LINE 211 number_of_rows ")
+    LOGGER.info(number_of_rows)
 
     database_name = get_database_name(catalog_entry)
     with metrics.record_counter(None) as counter:
