@@ -197,6 +197,8 @@ def sync_query(
     rows_saved = 0
 
     
+    LOGGER.info("**PR** LINE 200 row")
+    LOGGER.info(row)
 
     database_name = get_database_name(catalog_entry)
     with metrics.record_counter(None) as counter:
