@@ -100,14 +100,9 @@ def generate_select_sql(catalog_entry, columns):
     #     ",".join(escaped_columns), escaped_db, escaped_table
     # )
 
-    select_sql = """SELECT {}
-    ,SYSUTCDATETIME() AS _SDC_EXTRACTED_AT
-    ,SYSUTCDATETIME() AS _SDC_BATCHED_AT
-    ,null AS _SDC_DELETED_AT
-    FROM `{}`.`{}`
-    """.format(
-    ",".join(escaped_columns), escaped_db, escaped_table
-    
+    select_sql = "SELECT {}, SYSUTCDATETIME() AS _SDC_EXTRACTED_AT, SYSUTCDATETIME() AS _SDC_BATCHED_AT, null AS _SDC_DELETED_AT FROM {}.{}".format(
+        ",".join(escaped_columns), escaped_db, escaped_table
+    )
     # escape percent signs
     select_sql = select_sql.replace("%", "%%")
     return select_sql
