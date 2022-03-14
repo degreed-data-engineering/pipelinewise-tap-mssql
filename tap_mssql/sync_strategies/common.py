@@ -3,6 +3,7 @@
 
 import copy
 import datetime
+import multiprocessing 
 import singer
 import time
 import uuid
@@ -195,15 +196,26 @@ def sync_query(
         LOGGER.info(results)
     row = results.fetchone()
     rows_saved = 0
+    
+    many = results.fetchmany(1000)
+
+    # with multiprocessing.pool.Pool(process = 4) as pool:
+    #     result = pool.map(search_database_for_match, [for chunk in chunks(SEARCH_IDS,999)])
 
     
     # LOGGER.info("**PR** LINE 200 row")
     # LOGGER.info(row)
+    LOGGER.info("**PR** LINE 208 row")
+    LOGGER.info(many)
 
     database_name = get_database_name(catalog_entry)
     with metrics.record_counter(None) as counter:
         counter.tags["database"] = database_name
         counter.tags["table"] = catalog_entry.table
+
+
+        
+
 
         while row:
             counter.increment()
