@@ -195,21 +195,6 @@ def sync_query(
 
 
 
- 
-    sql = """SELECT {}
-    ,CONVERT_TZ( NOW(),@@session.time_zone,'+00:00') AS _SDC_EXTRACTED_AT
-    ,CONVERT_TZ( NOW(),@@session.time_zone,'+00:00') AS _SDC_BATCHED_AT
-    ,null AS _SDC_DELETED_AT
-    FROM `{}`.`{}`
-    """.format(
-        ','.join(column_safe_sql_values),
-        table_dict['schema_name'],
-        table_dict['table_name'],
-    )
-    export_batch_rows = self.connection_config['export_batch_rows']
-    exported_rows = 0
-
-
     # query_string = cursor.mogrify(select_sql, params)
 
     time_extracted = utils.now()
