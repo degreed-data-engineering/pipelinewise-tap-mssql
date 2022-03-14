@@ -186,13 +186,19 @@ def sync_query(
     time_extracted = utils.now()
     if len(params) == 0:
         results = cursor.execute(select_sql)
+
+        LOGGER.info("**PR** LINE 190 results")
+        LOGGER.info(results)
     else:
         results = cursor.execute(select_sql, params["replication_key_value"])
+        LOGGER.info("**PR** LINE 194 results")
+        LOGGER.info(results)
     row = results.fetchone()
     rows_saved = 0
 
-    database_name = get_database_name(catalog_entry)
+    
 
+    database_name = get_database_name(catalog_entry)
     with metrics.record_counter(None) as counter:
         counter.tags["database"] = database_name
         counter.tags["table"] = catalog_entry.table
