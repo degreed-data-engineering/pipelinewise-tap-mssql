@@ -217,7 +217,7 @@ def sync_query(
     split_file_max_chunks=20
 
     gzip_splitter = split_gzip.open(
-        path=ROOT_DIR, #figure out path
+        ROOT_DIR, #figure out path
         mode='wt',
         chunk_size_mb=split_file_chunk_size_mb,
         max_chunks=split_file_max_chunks if split_large_files else 0
