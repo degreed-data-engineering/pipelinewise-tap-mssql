@@ -95,14 +95,16 @@ def generate_select_sql(catalog_entry, columns):
     escaped_table = escape(catalog_entry.table)
     escaped_columns = [escape(c) for c in columns]
 
-
     # select_sql = "SELECT {} FROM {}.{}".format(
     #     ",".join(escaped_columns), escaped_db, escaped_table
     # )
 
-    select_sql = "SELECT {}, SYSUTCDATETIME() AS _SDC_EXTRACTED_AT, SYSUTCDATETIME() AS _SDC_BATCHED_AT, null AS _SDC_DELETED_AT FROM {}.{}".format(
-        ",".join(escaped_columns), escaped_db, escaped_table
+    extracted_at = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')
+    batched_at = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')
+    select_sql = "SELECT {}, {} AS _SDC_EXTRACTED_AT, {} AS _SDC_BATCHED_AT, null AS _SDC_DELETED_AT FROM {}.{}".format(
+        ",".join(escaped_columns), extract_at, batched_at, escaped_db, escaped_table
     )
+
     # escape percent signs
     select_sql = select_sql.replace("%", "%%")
     return select_sql
@@ -220,13 +222,29 @@ def sync_query(
     LOGGER.info(number_of_rows)
 
     database_name = get_database_name(catalog_entry)
+
+
+    md_map = metadata.to_map(catalog_entry.metadata)
+    stream_metadata = md_map.get((), {})
+    replication_method = stream_metadata.get("replication-method")    
+
+    LOGGER.info("**PR** LINE 231 md_map ")
+    LOGGER.info(md_map)
+    LOGGER.info("**PR** LINE 233 stream_metadata ")
+    LOGGER.info(stream_metadata)
+
+
+
+
+
+
+
+
+
+
     with metrics.record_counter(None) as counter:
         counter.tags["database"] = database_name
         counter.tags["table"] = catalog_entry.table
-
-
-        
-
 
         while row:
             counter.increment()
