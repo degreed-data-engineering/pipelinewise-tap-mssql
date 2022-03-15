@@ -225,7 +225,13 @@ def sync_query(
     database_name = get_database_name(catalog_entry)
 
 
-    md_map = metadata.to_map(catalog_entry.metadata)
+    md_map = metadata.to_map(catalog_entry.metadata) 
+
+    # update replication method
+    stream_metadata = md_map.write((), {}, "replication-method", "FASTSYNC" )
+
+
+    
     stream_metadata = md_map.get((), {})
     replication_method = stream_metadata.get("replication-method")    
 
