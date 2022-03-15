@@ -219,7 +219,7 @@ def sync_query(
     split_large_files=True
     split_file_chunk_size_mb=1000
     split_file_max_chunks=20
-
+    LOGGER.info(ROOT_DIR)
     gzip_splitter = split_gzip.open(
         ROOT_DIR, # figure out path for target-snowflake to pull from 
         mode='wt',
