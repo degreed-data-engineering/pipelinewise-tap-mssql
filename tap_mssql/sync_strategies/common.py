@@ -8,6 +8,7 @@ import datetime
 import glob
 import multiprocessing 
 import os
+import secrets
 import singer
 import time
 import uuid
