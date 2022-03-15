@@ -8,6 +8,7 @@ import datetime
 import glob
 import multiprocessing 
 import os
+import string
 import secrets
 import singer
 import time
