@@ -4,7 +4,6 @@
 from ast import Num
 from datetime import datetime
 import copy
-import datetime
 import multiprocessing 
 import singer
 import time
