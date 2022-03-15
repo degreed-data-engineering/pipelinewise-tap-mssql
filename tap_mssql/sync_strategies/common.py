@@ -199,12 +199,12 @@ def sync_query(
     if len(params) == 0:
         results = cursor.execute(select_sql)
 
-        LOGGER.info("**PR** LINE 190 results")
-        LOGGER.info(results)
+        # LOGGER.info("**PR** LINE 190 results")
+        # LOGGER.info(results)
     else:
         results = cursor.execute(select_sql, params["replication_key_value"])
-        LOGGER.info("**PR** LINE 194 results")
-        LOGGER.info(results)
+        # LOGGER.info("**PR** LINE 194 results")
+        # LOGGER.info(results)
 
     rows = results.fetchall()
     number_of_rows = len(rows)
@@ -212,15 +212,15 @@ def sync_query(
     rows_saved = 0
      
     
-    LOGGER.info("**PR** LINE 204 row")
-    LOGGER.info(rows)
+    # LOGGER.info("**PR** LINE 204 row")
+    # LOGGER.info(rows)
     #row = results.fetchall()
 
     
     # LOGGER.info("**PR** LINE 200 row")
     # LOGGER.info(row)
-    LOGGER.info("**PR** LINE 211 number_of_rows ")
-    LOGGER.info(number_of_rows)
+    # LOGGER.info("**PR** LINE 211 number_of_rows ")
+    # LOGGER.info(number_of_rows)
 
     database_name = get_database_name(catalog_entry)
 
@@ -236,10 +236,10 @@ def sync_query(
     stream_metadata.update({'replication-method':'FASTSYNC'})
     replication_method = stream_metadata.get("replication-method")    
 
-    LOGGER.info("**PR** LINE 231 md_map ")
-    LOGGER.info(md_map)
-    LOGGER.info("**PR** LINE 233 stream_metadata ")
-    LOGGER.info(stream_metadata)
+    # LOGGER.info("**PR** LINE 231 md_map ")
+    # LOGGER.info(md_map)
+    # LOGGER.info("**PR** LINE 233 stream_metadata ")
+    # LOGGER.info(stream_metadata)
 
 
     with metrics.record_counter(None) as counter:
