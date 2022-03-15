@@ -210,16 +210,18 @@ def sync_query(
         # LOGGER.info("**PR** LINE 194 results")
         # LOGGER.info(results)
  
-    #cur.execute(sql) has happened
+    
+    #cur.execute(sql) has happened at this point
 
     # export_batch_rows = self.connection_config['export_batch_rows'] TODO: put this back so its using the config value stated.
+    export_batch_rows = 50000
     exported_rows = 0
     split_large_files=True
     split_file_chunk_size_mb=1000
     split_file_max_chunks=20
 
     gzip_splitter = split_gzip.open(
-        ROOT_DIR, #figure out path
+        ROOT_DIR, # figure out path for target-snowflake to pull from 
         mode='wt',
         chunk_size_mb=split_file_chunk_size_mb,
         max_chunks=split_file_max_chunks if split_large_files else 0
@@ -235,7 +237,7 @@ def sync_query(
         )
 
         while True:
-            rows = results.fetchmany(50000) # TODO: change to config 
+            rows = results.fetchmany(export_batch_rows) # TODO: change to config 
             # No more rows to fetch, stop loop
             if not rows:
                 break
