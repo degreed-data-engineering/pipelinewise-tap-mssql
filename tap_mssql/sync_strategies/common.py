@@ -270,14 +270,16 @@ def sync_query(
 
     
     #cur.execute(sql) has happened at this point
-
+ 
 
     filename = gen_export_filename(tap_id='test', table=catalog_entry.table)
     filepath = os.path.join('tmp', filename)
     
 
     # export_batch_rows = self.connection_config['export_batch_rows'] TODO: put this back so its using the config value stated.
-    export_batch_rows = 50000
+
+    export_batch_rows = config.get("export_batch_rows")
+
     exported_rows = 0
     split_large_files=True
     split_file_chunk_size_mb=1000
