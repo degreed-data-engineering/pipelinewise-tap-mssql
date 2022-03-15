@@ -2,13 +2,16 @@
 # pylint: disable=too-many-arguments,duplicate-code,too-many-locals
 
 from ast import Num
-#from datetime import datetime
 import copy
+import csv
 import datetime
 import multiprocessing 
+import os
 import singer
 import time
 import uuid
+
+from . import split_gzip
 
 import singer.metrics as metrics
 from singer import metadata
@@ -16,6 +19,7 @@ from singer import utils
 
 LOGGER = singer.get_logger()
 
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def escape(string):
     if "`" in string:
@@ -205,10 +209,58 @@ def sync_query(
         results = cursor.execute(select_sql, params["replication_key_value"])
         # LOGGER.info("**PR** LINE 194 results")
         # LOGGER.info(results)
+ 
+    #cur.execute(sql) has happened
+
+    split_large_files=True
+    split_file_chunk_size_mb=1000
+    split_file_max_chunks=20
+
+    gzip_splitter = split_gzip.open(
+        path=ROOT_DIR, #figure out path
+        mode='wt',
+        chunk_size_mb=split_file_chunk_size_mb,
+        max_chunks=split_file_max_chunks if split_large_files else 0
+       # compress=compress,
+    )
+
+    with gzip_splitter as split_gzip_files:
+        writer = csv.writer(
+            split_gzip_files,
+            delimiter=',',
+            quotechar='"',
+            quoting=csv.QUOTE_MINIMAL,
+        )
+
+        while True:
+            rows = results.fetchmany(50000) # TODO: change to config 
+            # No more rows to fetch, stop loop
+            if not rows:
+                break
+
+            # Log export status
+            exported_rows += len(rows)
+            if len(rows) == export_batch_rows:
+                # Then we believe this to be just an interim batch and not the final one so report on progress
+
+                LOGGER.info(
+                    'Exporting batch from %s to %s rows from %s...',
+                    (exported_rows - export_batch_rows),
+                    exported_rows,
+                    table_name,
+                )
+            # Write rows to file in one go
+            writer.writerows(rows)
+
+        LOGGER.info(
+            'Exported total of %s rows from %s...', exported_rows, table_name
+        )
+
+
+
 
     rows = results.fetchall()
     number_of_rows = len(rows)
-
     rows_saved = 0
      
     
