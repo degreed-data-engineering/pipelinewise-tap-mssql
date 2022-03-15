@@ -244,6 +244,7 @@ def sync_query(
     stream_version,
     table_stream,
     params,
+    config,
 ):
     replication_key = singer.get_bookmark(
         state, catalog_entry.tap_stream_id, "replication_key"
