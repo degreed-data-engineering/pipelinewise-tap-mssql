@@ -212,6 +212,8 @@ def sync_query(
  
     #cur.execute(sql) has happened
 
+    # export_batch_rows = self.connection_config['export_batch_rows'] TODO: put this back so its using the config value stated.
+    exported_rows = 0
     split_large_files=True
     split_file_chunk_size_mb=1000
     split_file_max_chunks=20
