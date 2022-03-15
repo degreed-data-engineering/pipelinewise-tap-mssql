@@ -2,8 +2,9 @@
 # pylint: disable=too-many-arguments,duplicate-code,too-many-locals
 
 from ast import Num
-from datetime import datetime
+#from datetime import datetime
 import copy
+import datetime
 import multiprocessing 
 import singer
 import time
@@ -95,15 +96,15 @@ def generate_select_sql(catalog_entry, columns):
     escaped_table = escape(catalog_entry.table)
     escaped_columns = [escape(c) for c in columns]
 
-    # select_sql = "SELECT {} FROM {}.{}".format(
-    #     ",".join(escaped_columns), escaped_db, escaped_table
-    # )
-
-    extracted_at = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')
-    batched_at = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')
-    select_sql = "SELECT {}, '{}' AS _SDC_EXTRACTED_AT, '{}' AS _SDC_BATCHED_AT, null AS _SDC_DELETED_AT FROM {}.{}".format(
-        ",".join(escaped_columns), extracted_at, batched_at, escaped_db, escaped_table
+    select_sql = "SELECT {} FROM {}.{}".format(
+        ",".join(escaped_columns), escaped_db, escaped_table
     )
+
+    # extracted_at = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')
+    # batched_at = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')
+    # select_sql = "SELECT {}, '{}' AS _SDC_EXTRACTED_AT, '{}' AS _SDC_BATCHED_AT, null AS _SDC_DELETED_AT FROM {}.{}".format(
+    #     ",".join(escaped_columns), extracted_at, batched_at, escaped_db, escaped_table
+    # )
 
     # escape percent signs
     select_sql = select_sql.replace("%", "%%")
