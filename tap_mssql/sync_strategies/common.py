@@ -179,6 +179,28 @@ def whitelist_bookmark_keys(bookmark_key_set, tap_stream_id, state):
     ]:
         singer.clear_bookmark(state, tap_stream_id, bk)
 
+
+
+def generate_random_string(length: int = 8) -> str:
+    """
+    Generate cryptographically secure random strings
+    Uses best practice from Python doc https://docs.python.org/3/library/secrets.html#recipes-and-best-practices
+    Args:
+        length: length of the string to generate
+    Returns: random string
+    """
+
+    if length < 1:
+        raise Exception('Length must be at least 1!')
+
+    if 0 < length < 8:
+        warnings.warn('Length is too small! consider 8 or more characters')
+
+    return ''.join(
+        secrets.choice(string.ascii_uppercase + string.digits) for _ in range(length)
+    )
+
+
 def gen_export_filename(
     tap_id: str, table: str, suffix: str = None, postfix: str = None, ext: str = None
 ) -> str:
