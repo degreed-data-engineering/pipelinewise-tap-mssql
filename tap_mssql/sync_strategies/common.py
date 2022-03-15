@@ -251,13 +251,13 @@ def sync_query(
                     'Exporting batch from %s to %s rows from %s...',
                     (exported_rows - export_batch_rows),
                     exported_rows,
-                    table_name,
+                    catalog_entry.table 
                 )
             # Write rows to file in one go
             writer.writerows(rows)
 
         LOGGER.info(
-            'Exported total of %s rows from %s...', exported_rows, table_name
+            'Exported total of %s rows from %s...', exported_rows, catalog_entry.table
         )
 
 
