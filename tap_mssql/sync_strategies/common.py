@@ -213,7 +213,7 @@ def sync_query(
      
     
     LOGGER.info("**PR** LINE 204 row")
-    LOGGER.info(row)
+    LOGGER.info(rows)
     #row = results.fetchall()
 
     
