@@ -288,7 +288,7 @@ def sync_query(
         mode='wt',
         chunk_size_mb=split_file_chunk_size_mb,
         max_chunks=split_file_max_chunks if split_large_files else 0
-       # compress=compress,
+        compress=compress
     )
 
     with gzip_splitter as split_gzip_files:
@@ -341,8 +341,8 @@ def sync_query(
     # LOGGER.info("**PR** LINE 211 number_of_rows ")
     # LOGGER.info(number_of_rows)
 
-    database_name = get_database_name(catalog_entry)
 
+    database_name = get_database_name(catalog_entry)
 
     md_map = metadata.to_map(catalog_entry.metadata) 
 
@@ -359,52 +359,6 @@ def sync_query(
     # LOGGER.info(md_map)
     # LOGGER.info("**PR** LINE 233 stream_metadata ")
     # LOGGER.info(stream_metadata)
-
-
-    with metrics.record_counter(None) as counter:
-        counter.tags["database"] = database_name
-        counter.tags["table"] = catalog_entry.table
-        
-        for row in rows:
-            
-            counter.increment()
-            rows_saved += 1
-            record_message = row_to_singer_record(
-                catalog_entry,
-                stream_version,
-                table_stream,
-                row,
-                columns,
-                time_extracted,
-            )
-            singer.write_message(record_message)
-            md_map = metadata.to_map(catalog_entry.metadata)
-            stream_metadata = md_map.get((), {})
-            replication_method = stream_metadata.get("replication-method")
-
-            if replication_method in {"FASTSYNC"}:
-                key_properties = get_key_properties(catalog_entry)
-
-                max_pk_values = singer.get_bookmark(
-                    state, catalog_entry.tap_stream_id, "max_pk_values"
-                )
-
-                if max_pk_values:
-                    last_pk_fetched = {
-                        k: v
-                        for k, v in record_message.record.items()
-                        if k in key_properties
-                    }
-
-                    state = singer.write_bookmark(
-                        state,
-                        catalog_entry.tap_stream_id,
-                        "last_pk_fetched",
-                        last_pk_fetched,
-                    )
-            if rows_saved % 1000 == 0:
-                singer.write_message(singer.StateMessage(value=copy.deepcopy(state)))
-
 
 
     singer.write_message(singer.StateMessage(value=copy.deepcopy(state)))
