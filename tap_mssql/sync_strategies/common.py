@@ -284,12 +284,12 @@ def sync_query(
     split_file_max_chunks=20
  
     gzip_splitter = split_gzip.open(
-        filepath, # figure out path for target-snowflake to pull from 
+        filepath, 
         mode='wt',
         chunk_size_mb=split_file_chunk_size_mb,
-        max_chunks=split_file_max_chunks if split_large_files else 0
-        compress=compress
-    )
+        max_chunks=split_file_max_chunks if split_large_files else 0 
+        #compress=compress,
+        )
 
     with gzip_splitter as split_gzip_files:
         writer = csv.writer(
@@ -350,8 +350,6 @@ def sync_query(
 
     stream_metadata = md_map.get((), {}) 
 
-
-     
     stream_metadata.update({'replication-method':'FASTSYNC'})
     replication_method = stream_metadata.get("replication-method")    
 
@@ -359,6 +357,5 @@ def sync_query(
     # LOGGER.info(md_map)
     # LOGGER.info("**PR** LINE 233 stream_metadata ")
     # LOGGER.info(stream_metadata)
-
 
     singer.write_message(singer.StateMessage(value=copy.deepcopy(state)))
