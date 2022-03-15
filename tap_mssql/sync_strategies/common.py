@@ -101,7 +101,7 @@ def generate_select_sql(catalog_entry, columns):
 
     extracted_at = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')
     batched_at = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')
-    select_sql = "SELECT {}, {} AS _SDC_EXTRACTED_AT, {} AS _SDC_BATCHED_AT, null AS _SDC_DELETED_AT FROM {}.{}".format(
+    select_sql = "SELECT {}, '{}' AS _SDC_EXTRACTED_AT, '{}' AS _SDC_BATCHED_AT, null AS _SDC_DELETED_AT FROM {}.{}".format(
         ",".join(escaped_columns), extracted_at, batched_at, escaped_db, escaped_table
     )
 
