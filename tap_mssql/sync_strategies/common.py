@@ -5,6 +5,7 @@ from ast import Num
 import copy
 import csv
 import datetime
+import glob
 import multiprocessing 
 import os
 import singer
@@ -18,8 +19,7 @@ from singer import metadata
 from singer import utils
 
 LOGGER = singer.get_logger()
-
-ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+ 
 
 def escape(string):
     if "`" in string:
@@ -179,6 +179,37 @@ def whitelist_bookmark_keys(bookmark_key_set, tap_stream_id, state):
     ]:
         singer.clear_bookmark(state, tap_stream_id, bk)
 
+def gen_export_filename(
+    tap_id: str, table: str, suffix: str = None, postfix: str = None, ext: str = None
+) -> str:
+    """
+    Generates a unique filename used for exported fastsync data that avoids file name collision
+
+    Default pattern:
+        pipelinewise_<tap_id>_<table>_<timestamp_with_ms>_fastsync_<random_string>.csv.gz
+
+    Args:
+        tap_id: Unique tap id
+        table: Name of the table to export
+        suffix: Generated filename suffix. Defaults to current timestamp in milliseconds
+        postfix: Generated filename postfix. Defaults to a random 8 character length string
+        ext: Filename extension. Defaults to .csv.gz
+
+    Returns:
+        Unique filename as a string
+    """
+    if not suffix:
+        suffix = datetime.datetime.now().strftime('%Y%m%d-%H%M%S-%f')
+
+    if not postfix:
+        postfix = generate_random_string()
+
+    if not ext:
+        ext = 'csv.gz'
+
+    return 'pipelinewise_{}_{}_{}_fastsync_{}.{}'.format(
+        tap_id, table, suffix, postfix, ext
+    )
 
 def sync_query(
     cursor,
@@ -211,7 +242,15 @@ def sync_query(
         # LOGGER.info(results)
  
     
+
+
+    
     #cur.execute(sql) has happened at this point
+
+
+    filename = gen_export_filename(tap_id='test', table=catalog_entry.table)
+    filepath = os.path.join('tmp', filename)
+    
 
     # export_batch_rows = self.connection_config['export_batch_rows'] TODO: put this back so its using the config value stated.
     export_batch_rows = 50000
@@ -219,9 +258,9 @@ def sync_query(
     split_large_files=True
     split_file_chunk_size_mb=1000
     split_file_max_chunks=20
-    LOGGER.info(ROOT_DIR)
+ 
     gzip_splitter = split_gzip.open(
-        ROOT_DIR, # figure out path for target-snowflake to pull from 
+        filepath, # figure out path for target-snowflake to pull from 
         mode='wt',
         chunk_size_mb=split_file_chunk_size_mb,
         max_chunks=split_file_max_chunks if split_large_files else 0
@@ -260,7 +299,7 @@ def sync_query(
             'Exported total of %s rows from %s...', exported_rows, catalog_entry.table
         )
 
-
+ 
 
 
     rows = results.fetchall()
