@@ -206,8 +206,8 @@ def sync_query(
         LOGGER.info("**PR** LINE 194 results")
         LOGGER.info(results)
 
-    row = results.fetchall()
-    number_of_rows = len(row)
+    rows = results.fetchall()
+    number_of_rows = len(rows)
 
     rows_saved = 0
      
@@ -242,19 +242,12 @@ def sync_query(
     LOGGER.info(stream_metadata)
 
 
-
-
-    
-
-
-
-
-
     with metrics.record_counter(None) as counter:
         counter.tags["database"] = database_name
         counter.tags["table"] = catalog_entry.table
-
-        while row:
+        
+        for row in rows:
+            
             counter.increment()
             rows_saved += 1
             record_message = row_to_singer_record(
@@ -270,7 +263,7 @@ def sync_query(
             stream_metadata = md_map.get((), {})
             replication_method = stream_metadata.get("replication-method")
 
-            if replication_method in {"FULL_TABLE", "LOG_BASED"}:
+            if replication_method in {"FASTSYNC"}:
                 key_properties = get_key_properties(catalog_entry)
 
                 max_pk_values = singer.get_bookmark(
@@ -290,25 +283,9 @@ def sync_query(
                         "last_pk_fetched",
                         last_pk_fetched,
                     )
-
-            elif replication_method == "INCREMENTAL":
-                if replication_key is not None:
-                    state = singer.write_bookmark(
-                        state,
-                        catalog_entry.tap_stream_id,
-                        "replication_key",
-                        replication_key,
-                    )
-
-                    state = singer.write_bookmark(
-                        state,
-                        catalog_entry.tap_stream_id,
-                        "replication_key_value",
-                        record_message.record[replication_key],
-                    )
             if rows_saved % 1000 == 0:
                 singer.write_message(singer.StateMessage(value=copy.deepcopy(state)))
 
-            row = results.fetchone()
+
 
     singer.write_message(singer.StateMessage(value=copy.deepcopy(state)))
