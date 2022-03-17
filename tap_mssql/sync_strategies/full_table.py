@@ -76,18 +76,21 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
         LOGGER.info(f'state: {state}')
     
     
-    
-        # LOGGER.info("Generating fastsync select_sql")
-        # common.fastsync_query(
-        #         open_conn,
-        #         catalog_entry,
-        #         state,
-        #         select_sql,
-        #         columns,
-        #         stream_version,
-        #         table_stream,
-        #         params,
-        # )
+
+        with mssql_conn.connect() as open_conn:
+            LOGGER.info("Generating fastsync select_sql")
+            select_sql = common.generate_select_sql(catalog_entry, columns)
+            params = {}
+            common.fastsync_query(
+                    open_conn,
+                    catalog_entry,
+                    state,
+                    select_sql,
+                    columns,
+                    stream_version,
+                    table_stream,
+                    params,
+            )
 
     else: 
 

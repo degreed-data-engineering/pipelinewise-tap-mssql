@@ -255,3 +255,58 @@ def sync_query(
             row = results.fetchone()
 
     singer.write_message(singer.StateMessage(value=copy.deepcopy(state)))
+
+
+
+def fetch_current_incremental_key_pos(self, table, replication_key):
+
+
+
+
+def fastsync_query(
+    cursor,
+    catalog_entry,
+    state,
+    select_sql,
+    columns,
+    stream_version,
+    table_stream,
+    params,
+):
+    replication_key = singer.get_bookmark(
+        state, catalog_entry.tap_stream_id, "replication_key"
+    )
+
+    LOGGER.info('**PR** LINE 280')
+    LOGGER.info(f'replication key: {replication_key}'))
+    cursor.execute(select_sql)
+    row = results.fetchall()
+    database_name = get_database_name(catalog_entry)
+    #TODO: add retry... if n_retry > 0: 
+
+
+    max_pk_values = singer.get_bookmark(
+        state, catalog_entry.tap_stream_id, "max_pk_values"
+    )
+
+
+    LOGGER.info('**PR** LINE 292')
+    LOGGER.info(f'max_pk_values: {max_pk_values}'))
+
+
+
+    # escaped_db = escape(database_name)
+    # escaped_table = escape(catalog_entry.table)
+
+    # result = self.query(
+    #     'SELECT MAX({}) AS key_value FROM {}'.format(replication_key, table)
+    # )
+
+    # mysql_key_value = result[0].get('key_value')
+    # key_value = mysql_key_value
+
+ 
+
+
+
+
