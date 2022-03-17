@@ -62,6 +62,7 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
     ):
         singer.write_message(activate_version_message)
 
+        
         LOGGER.info('**PR** Line 65')
         LOGGER.info(f'bookmark: {bookmark}')
         LOGGER.info(f'version_exists: {version_exists}')
@@ -75,7 +76,7 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
         LOGGER.info(f'stream_version: {stream_version}')
         LOGGER.info(f'state: {state}')
     
-    
+        params = {}
         with mssql_conn.connect().execution_options(stream_results=True) as open_conn:
             LOGGER.info("Generating fastsync select_sql")
             select_sql = common.generate_select_sql(catalog_entry, columns, fastsync=True)
