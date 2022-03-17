@@ -7,7 +7,6 @@ import datetime
 import glob
 import multiprocessing 
 import os
-import pandas as pd
 import secrets
 import singer
 import string
@@ -393,53 +392,53 @@ def copy_table(
     
 
      
-    filename = gen_export_filename(table=catalog_entry.table)
-    filepath = os.path.join('fastsync', filename)
-    export_batch_rows = config.get("export_batch_rows")
+    # filename = gen_export_filename(table=catalog_entry.table)
+    # filepath = os.path.join('fastsync', filename)
+    # export_batch_rows = config.get("export_batch_rows")
     
-    exported_rows = 0
-    split_large_files=True
-    split_file_chunk_size_mb=1000
-    split_file_max_chunks=20
+    # exported_rows = 0
+    # split_large_files=True
+    # split_file_chunk_size_mb=1000
+    # split_file_max_chunks=20
 
-    gzip_splitter = split_gzip.open(
-        filepath, 
-        mode='wt',
-        chunk_size_mb=split_file_chunk_size_mb,
-        max_chunks=split_file_max_chunks if split_large_files else 0 
-        #compress=compress,
-        )
+    # gzip_splitter = split_gzip.open(
+    #     filepath, 
+    #     mode='wt',
+    #     chunk_size_mb=split_file_chunk_size_mb,
+    #     max_chunks=split_file_max_chunks if split_large_files else 0 
+    #     #compress=compress,
+    #     )
 
-    with gzip_splitter as split_gzip_files:
-        writer = csv.writer(
-            split_gzip_files,
-            delimiter=',',
-            quotechar='"',
-            quoting=csv.QUOTE_MINIMAL,
-        )
+    # with gzip_splitter as split_gzip_files:
+    #     writer = csv.writer(
+    #         split_gzip_files,
+    #         delimiter=',',
+    #         quotechar='"',
+    #         quoting=csv.QUOTE_MINIMAL,
+    #     )
 
-        while True:
-            rows = results.fetchmany(export_batch_rows) # TODO: change to config 
-            # No more rows to fetch, stop loop
-            if not rows:
-                break
+    #     while True:
+    #         rows = results.fetchmany(export_batch_rows) # TODO: change to config 
+    #         # No more rows to fetch, stop loop
+    #         if not rows:
+    #             break
 
-            # Log export status
-            exported_rows += len(rows)
-            if len(rows) == export_batch_rows:
-                # Then we believe this to be just an interim batch and not the final one so report on progress
+    #         # Log export status
+    #         exported_rows += len(rows)
+    #         if len(rows) == export_batch_rows:
+    #             # Then we believe this to be just an interim batch and not the final one so report on progress
 
-                LOGGER.info(
-                    'Exporting batch from %s to %s rows from %s...',
-                    (exported_rows - export_batch_rows),
-                    exported_rows,
-                    catalog_entry.table 
-                )
-            # Write rows to file in one go
-            writer.writerows(rows)
+    #             LOGGER.info(
+    #                 'Exporting batch from %s to %s rows from %s...',
+    #                 (exported_rows - export_batch_rows),
+    #                 exported_rows,
+    #                 catalog_entry.table 
+    #             )
+    #         # Write rows to file in one go
+    #         writer.writerows(rows)
 
-        LOGGER.info(
-            'Exported total of %s rows from %s...', exported_rows, catalog_entry.table
-        )
+    #     LOGGER.info(
+    #         'Exported total of %s rows from %s...', exported_rows, catalog_entry.table
+    #     )
 
  
