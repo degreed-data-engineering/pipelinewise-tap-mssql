@@ -278,7 +278,7 @@ def fastsync_query(
     )
 
     LOGGER.info('**PR** LINE 280')
-    LOGGER.info(f'replication key: {replication_key}'))
+    LOGGER.info(f'replication key: {replication_key}')
     cursor.execute(select_sql)
     row = results.fetchall()
     database_name = get_database_name(catalog_entry)
@@ -291,7 +291,7 @@ def fastsync_query(
 
 
     LOGGER.info('**PR** LINE 292')
-    LOGGER.info(f'max_pk_values: {max_pk_values}'))
+    LOGGER.info(f'max_pk_values: {max_pk_values}')
 
 
 
