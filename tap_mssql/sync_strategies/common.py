@@ -2,10 +2,18 @@
 # pylint: disable=too-many-arguments,duplicate-code,too-many-locals
 
 import copy
+import csv
 import datetime
+import glob
+import multiprocessing 
+import os
+import string
 import singer
 import time
 import uuid
+
+from . import split_gzip
+from . import utils
 
 import singer.metrics as metrics
 from singer import metadata
@@ -274,10 +282,12 @@ def fastsync_query(
     params,
 ):
 
+    # for incremental
     replication_key = singer.get_bookmark(
         state, catalog_entry.tap_stream_id, "replication_key"
     )
 
+    # for log based
     max_pk_values = singer.get_bookmark(
         state, catalog_entry.tap_stream_id, "max_pk_values"
     )
@@ -294,7 +304,7 @@ def fastsync_query(
     results = cursor.fetchall()
     database_name = get_database_name(catalog_entry)
     #TODO: add retry... if n_retry > 0: 
-        
+
 
 
 
