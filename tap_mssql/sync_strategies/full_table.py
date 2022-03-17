@@ -91,12 +91,12 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
 
 
         conn = mssql_conn.connect().execution_options(stream_results=True)
-        for chunk_dataframe in pd.read_sql(query, conn, chunksize=100000):
+        for chunk_dataframe in pd.read_sql(select_sql, conn, chunksize=100000):
     
             print(f"Got dataframe w/{len(chunk_dataframe)} rows")
-            singer_df = singer_df.append(chunk_dataframe, ignore_index=True)
+            query_df = query_df.append(chunk_dataframe, ignore_index=True)
             LOGGER.info("**PR** line 89 df:")
-            LOGGER.info(singer_df)
+            LOGGER.info(query_df)
 
             # common.copy_table(
             #     open_conn,
