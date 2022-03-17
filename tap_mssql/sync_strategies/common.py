@@ -102,11 +102,11 @@ def generate_select_sql(catalog_entry, columns, fastsync=False):
 
     if fastsync:
         time_extracted = utils.now()
-        _SDC_EXTRACTED_AT = f"'{time_extracted}' as _SDC_EXTRACTED_AT"
-        _SDC_BATCHED_AT = f"'{time_extracted}' as _SDC_BATCHED_AT"
+        extracted_at = f"'{time_extracted}' as _SDC_EXTRACTED_AT"
+        batched_at = f"'{time_extracted}' as _SDC_BATCHED_AT"
     
         select_sql = "SELECT {}, {}, {} FROM {}.{}".format(
-            ",".join(escaped_columns), _sdc_extracted_at, _sdc_batched_at, escaped_db, escaped_table
+            ",".join(escaped_columns), extracted_at, batched_at, escaped_db, escaped_table
         )
     else:
         select_sql = "SELECT {} FROM {}.{}".format(
