@@ -95,8 +95,8 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
     
             print(f"Got dataframe w/{len(chunk_dataframe)} rows")
             query_df = query_df.append(chunk_dataframe, ignore_index=True)
-            LOGGER.info("**PR** line 89 df:")
-            LOGGER.info(query_df)
+        LOGGER.info("**PR** line 89 df:")
+        LOGGER.info(query_df)
 
             # common.copy_table(
             #     open_conn,
