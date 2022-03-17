@@ -90,7 +90,7 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
         query_df = df = pd.DataFrame(columns=escaped_columns) 
 
 
-        conn = engine.connect().execution_options(stream_results=True)
+        conn = mssql_conn.connect().execution_options(stream_results=True)
         for chunk_dataframe in pd.read_sql(query, conn, chunksize=100000):
     
             print(f"Got dataframe w/{len(chunk_dataframe)} rows")
