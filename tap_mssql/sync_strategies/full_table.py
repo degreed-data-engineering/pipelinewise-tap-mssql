@@ -62,18 +62,18 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
     ):
         singer.write_message(activate_version_message)
 
-    LOGGER.info('**PR** Line 65')
-    LOGGER.info(f'bookmark: {bookmark}')
-    LOGGER.info(f'version_exists: {version_exists}')
-    LOGGER.info(f'initial_full_table_complete: {initial_full_table_complete}')
-    LOGGER.info(f'state_version: {state_version}')
-    LOGGER.info(f'table_stream: {table_stream}')
-    LOGGER.info(f'active_version_message: {activate_version_message}') 
-    LOGGER.info(f'catalog_entry: {catalog_entry}')
-    LOGGER.info(f'catalog_entry.metadata: {catalog_entry.metadata}')
-    LOGGER.info(f'columns: {columns}')
-    LOGGER.info(f'stream_version: {stream_version}')
-    LOGGER.info(f'state: {state}')
+        LOGGER.info('**PR** Line 65')
+        LOGGER.info(f'bookmark: {bookmark}')
+        LOGGER.info(f'version_exists: {version_exists}')
+        LOGGER.info(f'initial_full_table_complete: {initial_full_table_complete}')
+        LOGGER.info(f'state_version: {state_version}')
+        LOGGER.info(f'table_stream: {table_stream}')
+        LOGGER.info(f'active_version_message: {activate_version_message}') 
+        LOGGER.info(f'catalog_entry: {catalog_entry}')
+        LOGGER.info(f'catalog_entry.metadata: {catalog_entry.metadata}')
+        LOGGER.info(f'columns: {columns}')
+        LOGGER.info(f'stream_version: {stream_version}')
+        LOGGER.info(f'state: {state}')
     
     
     
