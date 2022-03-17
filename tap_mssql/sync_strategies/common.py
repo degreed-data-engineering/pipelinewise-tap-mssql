@@ -7,6 +7,7 @@ import datetime
 import glob
 import multiprocessing 
 import os
+import pandas as pd
 import secrets
 import singer
 import string
@@ -389,9 +390,9 @@ def copy_table(
     # LOGGER.info(number_of_rows)
 
 
+    
 
-
-
+     
     filename = gen_export_filename(table=catalog_entry.table)
     filepath = os.path.join('fastsync', filename)
     export_batch_rows = config.get("export_batch_rows")

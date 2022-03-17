@@ -2,6 +2,7 @@
 # pylint: disable=duplicate-code,too-many-locals,simplifiable-if-expression
 
 import copy
+import pandas as pd
 import singer
 from singer import metadata
 
@@ -77,21 +78,37 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
         LOGGER.info(f'state: {state}')
     
         params = {}
-        with mssql_conn.connect().execution_options(stream_results=True) as open_conn:
-            LOGGER.info("Generating fastsync select_sql")
-            select_sql = common.generate_select_sql(catalog_entry, columns, fastsync=True)
+        # with mssql_conn.connect().execution_options(stream_results=True) as open_conn:
+        #     LOGGER.info("Generating fastsync select_sql")
+        #     select_sql = common.generate_select_sql(catalog_entry, columns, fastsync=True)
 
-            common.copy_table(
-                open_conn,
-                catalog_entry,
-                state,
-                select_sql,
-                columns,
-                stream_version,
-                table_stream,
-                params,
-                config,
-            )
+        select_sql = common.generate_select_sql(catalog_entry, columns, fastsync=True)
+        
+        escaped_columns = [common.escape(c) for c in columns]
+        escaped_columns.extend(['_SDC_EXTRACTED_AT','_SDC_BATCHED_AT'])
+    
+        query_df = df = pd.DataFrame(columns=escaped_columns) 
+
+
+        conn = engine.connect().execution_options(stream_results=True)
+        for chunk_dataframe in pd.read_sql(query, conn, chunksize=100000):
+    
+            print(f"Got dataframe w/{len(chunk_dataframe)} rows")
+            singer_df = singer_df.append(chunk_dataframe, ignore_index=True)
+            LOGGER.info("**PR** line 89 df:")
+            LOGGER.info(singer_df)
+
+            # common.copy_table(
+            #     open_conn,
+            #     catalog_entry,
+            #     state,
+            #     select_sql,
+            #     columns,
+            #     stream_version,
+            #     table_stream,
+            #     params,
+            #     config,
+            # )
  
 
     else: 
