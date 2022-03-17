@@ -71,34 +71,51 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
     LOGGER.info(f'active_version_message: {activate_version_message}') 
     LOGGER.info(f'catalog_entry: {catalog_entry}')
     LOGGER.info(f'catalog_entry.metadata: {catalog_entry.metadata}')
+    LOGGER.info(f'columns: {columns}')
+    LOGGER.info(f'stream_version: {stream_version}')
+    LOGGER.info(f'state: {state}')
+    
+    
+    
+        # LOGGER.info("Generating fastsync select_sql")
+        # common.fastsync_query(
+        #         open_conn,
+        #         catalog_entry,
+        #         state,
+        #         select_sql,
+        #         columns,
+        #         stream_version,
+        #         table_stream,
+        #         params,
+        # )
 
+    else: 
 
+        with mssql_conn.connect() as open_conn:
+            LOGGER.info("Generating select_sql")
+            select_sql = common.generate_select_sql(catalog_entry, columns)
 
-    with mssql_conn.connect() as open_conn:
-        LOGGER.info("Generating select_sql")
-        select_sql = common.generate_select_sql(catalog_entry, columns)
+            params = {}
 
-        params = {}
+            if catalog_entry.tap_stream_id == "dbo-InputMetadata":
+                prev_converter = modify_ouput_converter(open_conn)
 
-        if catalog_entry.tap_stream_id == "dbo-InputMetadata":
-            prev_converter = modify_ouput_converter(open_conn)
+            common.sync_query(
+                open_conn,
+                catalog_entry,
+                state,
+                select_sql,
+                columns,
+                stream_version,
+                table_stream,
+                params,
+            )
 
-        common.sync_query(
-            open_conn,
-            catalog_entry,
-            state,
-            select_sql,
-            columns,
-            stream_version,
-            table_stream,
-            params,
-        )
+            if catalog_entry.tap_stream_id == "dbo-InputMetadata":
+                revert_ouput_converter(open_conn, prev_converter)
 
-        if catalog_entry.tap_stream_id == "dbo-InputMetadata":
-            revert_ouput_converter(open_conn, prev_converter)
+        # clear max pk value and last pk fetched upon successful sync
+        singer.clear_bookmark(state, catalog_entry.tap_stream_id, "max_pk_values")
+        singer.clear_bookmark(state, catalog_entry.tap_stream_id, "last_pk_fetched")
 
-    # clear max pk value and last pk fetched upon successful sync
-    singer.clear_bookmark(state, catalog_entry.tap_stream_id, "max_pk_values")
-    singer.clear_bookmark(state, catalog_entry.tap_stream_id, "last_pk_fetched")
-
-    singer.write_message(activate_version_message)
+        singer.write_message(activate_version_message)
