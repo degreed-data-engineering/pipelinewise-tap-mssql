@@ -79,13 +79,18 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
         with mssql_conn.connect().execution_options(stream_results=True) as open_conn:
             LOGGER.info("Generating fastsync select_sql")
             select_sql = common.generate_select_sql(catalog_entry, columns, fastsync=True)
-            results = open_conn.execute(select_sql)
-            row = results.fetchall()
-            number_of_rows = len(row)
-            LOGGER.info('**PR** number_of_rows')
-            LOGGER.info(number_of_rows)
-   
 
+            common.copy_table(
+                open_conn,
+                catalog_entry,
+                state,
+                select_sql,
+                columns,
+                stream_version,
+                table_stream,
+                params,
+                config,
+            )
  
 
     else: 

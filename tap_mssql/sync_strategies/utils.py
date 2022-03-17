@@ -6,6 +6,7 @@ import string
 
 
 
+LOGGER = logging.getLogger(__name__)
 
 
 def generate_random_string(length: int = 8) -> str:
@@ -53,6 +54,6 @@ def gen_export_filename(
     if not ext:
         ext = 'csv.gz'
 
-    return 'pipelinewise_{}_{}_{}_fastsync_{}.{}'.format(
-        tap_id, table, suffix, postfix, ext
+    return 'pipelinewise_tap_mssql_{}_{}_fastsync_{}.{}'.format(
+        table, suffix, postfix, ext
     )
