@@ -7,12 +7,13 @@ import datetime
 import glob
 import multiprocessing 
 import os
+import secrets
 import singer
+import string
 import time
 import uuid
 
-from . import split_gzip
-from . import utils
+from . import split_gzip 
 
 import singer.metrics as metrics
 from singer import metadata
@@ -313,6 +314,55 @@ def fastsync_query(
     database_name = get_database_name(catalog_entry)
     #TODO: add retry... if n_retry > 0: 
     
+
+def generate_random_string(length: int = 8) -> str:
+    """
+    Generate cryptographically secure random strings
+    Uses best practice from Python doc https://docs.python.org/3/library/secrets.html#recipes-and-best-practices
+    Args:
+        length: length of the string to generate
+    Returns: random string
+    """
+
+    if length < 1:
+        raise Exception('Length must be at least 1!')
+
+    if 0 < length < 8:
+        warnings.warn('Length is too small! consider 8 or more characters')
+
+    return ''.join(
+        secrets.choice(string.ascii_uppercase + string.digits) for _ in range(length)
+    )
+
+
+def gen_export_filename(
+    table: str, suffix: str = None, postfix: str = None, ext: str = None
+) -> str:
+    """
+    Generates a unique filename used for exported fastsync data that avoids file name collision
+    Default pattern:
+        pipelinewise_<tap_id>_<table>_<timestamp_with_ms>_fastsync_<random_string>.csv.gz
+    Args:
+        tap_id: Unique tap id
+        table: Name of the table to export
+        suffix: Generated filename suffix. Defaults to current timestamp in milliseconds
+        postfix: Generated filename postfix. Defaults to a random 8 character length string
+        ext: Filename extension. Defaults to .csv.gz
+    Returns:
+        Unique filename as a string
+    """
+    if not suffix:
+        suffix = datetime.datetime.now().strftime('%Y%m%d-%H%M%S-%f')
+
+    if not postfix:
+        postfix = generate_random_string()
+
+    if not ext:
+        ext = 'csv.gz'
+
+    return 'pipelinewise_tap_mssql_{}_{}_fastsync_{}.{}'.format(
+        table, suffix, postfix, ext
+    )
 
  
 def copy_table(
