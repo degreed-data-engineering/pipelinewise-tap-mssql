@@ -273,25 +273,29 @@ def fastsync_query(
     table_stream,
     params,
 ):
+
     replication_key = singer.get_bookmark(
         state, catalog_entry.tap_stream_id, "replication_key"
     )
-
-    LOGGER.info('**PR** LINE 280')
-    LOGGER.info(f'replication key: {replication_key}')
-    cursor.execute(select_sql)
-    row = results.fetchall()
-    database_name = get_database_name(catalog_entry)
-    #TODO: add retry... if n_retry > 0: 
-
 
     max_pk_values = singer.get_bookmark(
         state, catalog_entry.tap_stream_id, "max_pk_values"
     )
 
 
+    LOGGER.info('**PR** LINE 280')
+    LOGGER.info(f'replication key: {replication_key}')
+
     LOGGER.info('**PR** LINE 292')
     LOGGER.info(f'max_pk_values: {max_pk_values}')
+
+
+    cursor.execute(select_sql)
+    results = cursor.fetchall()
+    database_name = get_database_name(catalog_entry)
+    #TODO: add retry... if n_retry > 0: 
+        
+
 
 
 
@@ -353,25 +357,5 @@ def fastsync_query(
                         "last_pk_fetched",
                         last_pk_fetched,
                     )
-
-            elif replication_method == "INCREMENTAL":
-                if replication_key is not None:
-                    state = singer.write_bookmark(
-                        state,
-                        catalog_entry.tap_stream_id,
-                        "replication_key",
-                        replication_key,
-                    )
-
-                    state = singer.write_bookmark(
-                        state,
-                        catalog_entry.tap_stream_id,
-                        "replication_key_value",
-                        record_message.record[replication_key],
-                    )
-            if rows_saved % 1000 == 0:
-                singer.write_message(singer.StateMessage(value=copy.deepcopy(state)))
-
-            row = results.fetchone()
 
     singer.write_message(singer.StateMessage(value=copy.deepcopy(state)))
