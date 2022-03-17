@@ -7,7 +7,6 @@ import datetime
 import glob
 import multiprocessing 
 import os
-import string
 import singer
 import time
 import uuid
@@ -95,15 +94,24 @@ def get_key_properties(catalog_entry):
     return key_properties
 
 
-def generate_select_sql(catalog_entry, columns):
+def generate_select_sql(catalog_entry, columns, fastsync=False):
     database_name = get_database_name(catalog_entry)
     escaped_db = escape(database_name)
     escaped_table = escape(catalog_entry.table)
     escaped_columns = [escape(c) for c in columns]
 
-    select_sql = "SELECT {} FROM {}.{}".format(
-        ",".join(escaped_columns), escaped_db, escaped_table
-    )
+    if fastsync:
+        time_extracted = utils.now()
+        _SDC_EXTRACTED_AT = f"'{time_extracted}' as _SDC_EXTRACTED_AT"
+        _SDC_BATCHED_AT = f"'{time_extracted}' as _SDC_BATCHED_AT"
+    
+        select_sql = "SELECT {}, {}, {} FROM {}.{}".format(
+            ",".join(escaped_columns), _sdc_extracted_at, _sdc_batched_at, escaped_db, escaped_table
+        )
+    else:
+        select_sql = "SELECT {} FROM {}.{}".format(
+            ",".join(escaped_columns), escaped_db, escaped_table
+        )
 
     # escape percent signs
     select_sql = select_sql.replace("%", "%%")
@@ -304,20 +312,7 @@ def fastsync_query(
     results = cursor.fetchall()
     database_name = get_database_name(catalog_entry)
     #TODO: add retry... if n_retry > 0: 
-
-
-
-
-
-    # escaped_db = escape(database_name)
-    # escaped_table = escape(catalog_entry.table)
-
-    # result = self.query(
-    #     'SELECT MAX({}) AS key_value FROM {}'.format(replication_key, table)
-    # )
-
-    # mysql_key_value = result[0].get('key_value')
-    # key_value = mysql_key_value
+    
 
  
 
@@ -326,46 +321,60 @@ def fastsync_query(
 
 
 
+    
 
-    with metrics.record_counter(None) as counter:
-        counter.tags["database"] = database_name
-        counter.tags["table"] = catalog_entry.table
 
-        while row:
-            counter.increment()
-            rows_saved += 1
-            record_message = row_to_singer_record(
-                catalog_entry,
-                stream_version,
-                table_stream,
-                row,
-                columns,
-                time_extracted,
-            )
-            singer.write_message(record_message)
-            md_map = metadata.to_map(catalog_entry.metadata)
-            stream_metadata = md_map.get((), {})
-            replication_method = stream_metadata.get("replication-method")
+# def copy_table():
 
-            if replication_method in {"FULL_TABLE", "LOG_BASED"}:
-                key_properties = get_key_properties(catalog_entry)
+#     export_batch_rows = config.get("export_batch_rows")
 
-                max_pk_values = singer.get_bookmark(
-                    state, catalog_entry.tap_stream_id, "max_pk_values"
-                )
+#     exported_rows = 0
+#     split_large_files=True
+#     split_file_chunk_size_mb=1000
+#     split_file_max_chunks=20
 
-                if max_pk_values:
-                    last_pk_fetched = {
-                        k: v
-                        for k, v in record_message.record.items()
-                        if k in key_properties
-                    }
+#     gzip_splitter = split_gzip.open(
+#         filepath, 
+#         mode='wt',
+#         chunk_size_mb=split_file_chunk_size_mb,
+#         max_chunks=split_file_max_chunks if split_large_files else 0 
+#         #compress=compress,
+#         )
 
-                    state = singer.write_bookmark(
-                        state,
-                        catalog_entry.tap_stream_id,
-                        "last_pk_fetched",
-                        last_pk_fetched,
-                    )
+#     with gzip_splitter as split_gzip_files:
+#         writer = csv.writer(
+#             split_gzip_files,
+#             delimiter=',',
+#             quotechar='"',
+#             quoting=csv.QUOTE_MINIMAL,
+#         )
 
-    singer.write_message(singer.StateMessage(value=copy.deepcopy(state)))
+#         while True:
+#             rows = results.fetchmany(export_batch_rows) # TODO: change to config 
+#             # No more rows to fetch, stop loop
+#             if not rows:
+#                 break
+
+#             # Log export status
+#             exported_rows += len(rows)
+#             if len(rows) == export_batch_rows:
+#                 # Then we believe this to be just an interim batch and not the final one so report on progress
+
+#                 LOGGER.info(
+#                     'Exporting batch from %s to %s rows from %s...',
+#                     (exported_rows - export_batch_rows),
+#                     exported_rows,
+#                     catalog_entry.table 
+#                 )
+#             # Write rows to file in one go
+#             writer.writerows(rows)
+
+#         LOGGER.info(
+#             'Exported total of %s rows from %s...', exported_rows, catalog_entry.table
+#         )
+
+
+
+
+#     rows = results.fetchall()
+#     number_of_rows = len(rows)
