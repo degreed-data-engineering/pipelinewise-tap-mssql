@@ -38,27 +38,28 @@ def generate_bookmark_keys(catalog_entry):
 
 
 
-def get_write_message(stream_name, record, version, time_extracted):
-
-
-    return singer.RecordMessage(
-        stream=table_stream,
-        record=rec,
-        version=version,
-        time_extracted=time_extracted,
-    )
-
-
-def write_dataframe_record(row, table_stream, version, time_extracted):
+ 
+def write_dataframe_record(row, catalog_entry, stream_version,columns, table_stream, version, time_extracted):
     record = row.to_json() 
-    rec = {
-        'type': 'RECORD',
-        'stream': "dbo_OntologySources",
-        'record': record,
-        'version': 1647360968793,
-        'time_extracted': "2022-03-15T16:16:10.122319Z" #time_extracted
-    }
-    singer.write_message(rec)
+
+
+    record_message = row_to_singer_record(
+        catalog_entry,
+        stream_version,
+        table_stream,
+        row,
+        columns,
+        time_extracted,
+    )
+    singer.write_message(record_message)
+    # rec = {
+    #     'type': 'RECORD',
+    #     'stream': 'dbo_OntologySources',
+    #     'record': record,
+    #     'version': 1647360968793,
+    #     'time_extracted': '2022-03-15T16:16:10.122319Z'
+    # }
+    # singer.write_message(dict(rec))
     # record_message = get_write_message(stream_name, record, version, time_extracted)
     # singer.write_message(record_message)
     # get_write_message() 
@@ -141,7 +142,7 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
         version = 1647539189127
         time_extracted = "2022-03-15T16:16:10.122319Z"
         LOGGER.info("**PR** line 130 creating records:")
-        query_df.apply(write_dataframe_record, args=(table_stream, version, time_extracted), axis=1)
+        query_df.apply(write_dataframe_record, args=(catalog_entry,stream_version, columns, table_stream, version, time_extracted), axis=1)
 
             # common.copy_table(
             #     open_conn,
