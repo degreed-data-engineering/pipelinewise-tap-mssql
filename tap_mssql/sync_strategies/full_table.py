@@ -104,7 +104,7 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
         LOGGER.info(escaped_columns)
         #escaped_columns.extend(['_SDC_EXTRACTED_AT','_SDC_BATCHED_AT'])
     
-        query_df = df = pd.DataFrame(columns=escaped_columns) 
+        query_df = df = pd.DataFrame(columns=columns) 
 
         time_extracted = utils.now() 
         conn = mssql_conn.connect().execution_options(stream_results=True)
