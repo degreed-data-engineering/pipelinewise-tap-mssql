@@ -39,15 +39,14 @@ def generate_bookmark_keys(catalog_entry):
 
 
  
-def write_dataframe_record(row, catalog_entry,stream_version, columns, table_stream, version, time_extracted):
+def write_dataframe_record(row, catalog_entry, stream_version, columns, table_stream, time_extracted):
     
     rec = row.to_dict() 
-    version = 1647360968793
-    time_extracted = "2022-03-15T16:16:10.122319Z"
+
     record_message = singer.RecordMessage(
             stream=table_stream,
             record=rec,
-            version=version,
+            version=stream_version,
             time_extracted=time_extracted,
         )
 
@@ -121,7 +120,7 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
         version = 1647539189127
         time_extracted = "2022-03-15T16:16:10.122319Z"
         LOGGER.info("**PR** line 130 creating records:")
-        query_df.apply(write_dataframe_record, args=(catalog_entry,stream_version, columns, table_stream, version, time_extracted), axis=1)
+        query_df.apply(write_dataframe_record, args=(catalog_entry,stream_version, columns, table_stream, time_extracted), axis=1)
 
             # common.copy_table(
             #     open_conn,
