@@ -99,6 +99,9 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
 
         select_sql = common.generate_select_sql(catalog_entry, columns, fastsync=True)
         escaped_columns = [common.escape(c) for c in columns]
+
+        LOGGER.info('**PR 103*** escaped columns')
+        LOGGER.info(escaped_columns)
         #escaped_columns.extend(['_SDC_EXTRACTED_AT','_SDC_BATCHED_AT'])
     
         query_df = df = pd.DataFrame(columns=escaped_columns) 
