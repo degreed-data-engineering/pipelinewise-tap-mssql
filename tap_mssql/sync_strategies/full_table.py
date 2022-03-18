@@ -108,7 +108,7 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
 
         time_extracted = utils.now() 
         conn = mssql_conn.connect().execution_options(stream_results=True)
-        for chunk_dataframe in pd.read_sql(select_sql, conn, chunksize=100000):
+        for chunk_dataframe in pd.read_sql(select_sql, conn, chunksize=1000000):
             #LOGGER.info(chunk_dataframe)
             #print(f"Got dataframe w/{len(chunk_dataframe)} rows")
             query_df = query_df.append(chunk_dataframe, ignore_index=True)
