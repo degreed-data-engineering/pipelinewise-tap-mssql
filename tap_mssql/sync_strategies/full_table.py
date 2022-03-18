@@ -93,7 +93,8 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
         LOGGER.info(f'columns: {columns}')
         LOGGER.info(f'stream_version: {stream_version}')
         LOGGER.info(f'state: {state}')
-    
+        
+        time_extracted = utils.now()
         params = {}
         # with mssql_conn.connect().execution_options(stream_results=True) as open_conn:
         #     LOGGER.info("Generating fastsync select_sql")
@@ -115,10 +116,7 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
         LOGGER.info("**PR** line 89 df:")
         LOGGER.info(query_df)
 
-         
-        table_stream = "dbo_OntologySources"
-        version = 1647539189127
-        time_extracted = "2022-03-15T16:16:10.122319Z"
+          
         LOGGER.info("**PR** line 130 creating records:")
         query_df.apply(write_dataframe_record, args=(catalog_entry,stream_version, columns, table_stream, time_extracted), axis=1)
 
