@@ -35,6 +35,29 @@ def generate_bookmark_keys(catalog_entry):
     return bookmark_keys
 
 
+
+
+def write_dataframe_record(row, table_stream, version, time_extracted):
+    record = row.to_json() 
+    
+    rec = {
+        'type': 'RECORD',
+        'stream': "dbo_OntologySources",
+        'record': record,
+        'version': 1647360968793,
+        'time_extracted': "2022-03-15T16:16:10.122319Z" #time_extracted
+    }
+
+    singer.write_message(rec)
+    
+    # return singer.RecordMessage(
+    #     stream=table_stream,
+    #     record=rec,
+    #     version=version,
+    #     time_extracted=time_extracted,
+    # )
+
+
 def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version):
     mssql_conn = get_azure_sql_engine(config)
     common.whitelist_bookmark_keys(
@@ -97,6 +120,12 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
             query_df = query_df.append(chunk_dataframe, ignore_index=True)
         LOGGER.info("**PR** line 89 df:")
         LOGGER.info(query_df)
+
+         
+        table_stream = "dbo_OntologySources"
+        version = 1647539189127
+        time_extracted = "2022-03-15T16:16:10.122319Z"
+        query_df.apply(write_dataframe_record, args=(table_stream, version, time_extracted), axis=1)
 
             # common.copy_table(
             #     open_conn,
