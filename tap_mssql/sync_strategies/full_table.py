@@ -5,6 +5,8 @@ import copy
 import pandas as pd
 import singer
 from singer import metadata
+from singer import utils
+import singer.metrics as metrics
 
 import tap_mssql.sync_strategies.common as common
 
@@ -116,7 +118,7 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
         conn = mssql_conn.connect().execution_options(stream_results=True)
         for chunk_dataframe in pd.read_sql(select_sql, conn, chunksize=100000):
     
-            print(f"Got dataframe w/{len(chunk_dataframe)} rows")
+            #print(f"Got dataframe w/{len(chunk_dataframe)} rows")
             query_df = query_df.append(chunk_dataframe, ignore_index=True)
         LOGGER.info("**PR** line 89 df:")
         LOGGER.info(query_df)
@@ -125,6 +127,7 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
         table_stream = "dbo_OntologySources"
         version = 1647539189127
         time_extracted = "2022-03-15T16:16:10.122319Z"
+        LOGGER.info("**PR** line 130 creating records:")
         query_df.apply(write_dataframe_record, args=(table_stream, version, time_extracted), axis=1)
 
             # common.copy_table(
