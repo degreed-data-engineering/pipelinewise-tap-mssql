@@ -93,44 +93,26 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
         LOGGER.info(f'columns: {columns}')
         LOGGER.info(f'stream_version: {stream_version}')
         LOGGER.info(f'state: {state}')
-        
-        time_extracted = utils.now()
+
+
         params = {}
-        # with mssql_conn.connect().execution_options(stream_results=True) as open_conn:
-        #     LOGGER.info("Generating fastsync select_sql")
-        #     select_sql = common.generate_select_sql(catalog_entry, columns, fastsync=True)
 
         select_sql = common.generate_select_sql(catalog_entry, columns, fastsync=True)
-        
         escaped_columns = [common.escape(c) for c in columns]
-        escaped_columns.extend(['_SDC_EXTRACTED_AT','_SDC_BATCHED_AT'])
+        #escaped_columns.extend(['_SDC_EXTRACTED_AT','_SDC_BATCHED_AT'])
     
         query_df = df = pd.DataFrame(columns=escaped_columns) 
 
-
+        time_extracted = utils.now() 
         conn = mssql_conn.connect().execution_options(stream_results=True)
         for chunk_dataframe in pd.read_sql(select_sql, conn, chunksize=100000):
-    
+            LOGGER.info(chunk_dataframe)
             #print(f"Got dataframe w/{len(chunk_dataframe)} rows")
             query_df = query_df.append(chunk_dataframe, ignore_index=True)
-        LOGGER.info("**PR** line 89 df:")
-        LOGGER.info(query_df)
+            LOGGER.info("**PR** line 89 df:")
+        
+            query_df.apply(write_dataframe_record, args=(catalog_entry,stream_version, columns, table_stream, time_extracted), axis=1)
 
-          
-        LOGGER.info("**PR** line 130 creating records:")
-        query_df.apply(write_dataframe_record, args=(catalog_entry,stream_version, columns, table_stream, time_extracted), axis=1)
-
-            # common.copy_table(
-            #     open_conn,
-            #     catalog_entry,
-            #     state,
-            #     select_sql,
-            #     columns,
-            #     stream_version,
-            #     table_stream,
-            #     params,
-            #     config,
-            # )
  
 
     else: 

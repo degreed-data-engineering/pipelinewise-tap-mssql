@@ -100,20 +100,11 @@ def generate_select_sql(catalog_entry, columns, fastsync=False):
     escaped_db = escape(database_name)
     escaped_table = escape(catalog_entry.table)
     escaped_columns = [escape(c) for c in columns]
-
-    if fastsync:
-        time_extracted = utils.now()
-        extracted_at = f"'{time_extracted}' as _SDC_EXTRACTED_AT"
-        batched_at = f"'{time_extracted}' as _SDC_BATCHED_AT"
     
-        select_sql = "SELECT {}, {}, {} FROM {}.{}".format(
-            ",".join(escaped_columns), extracted_at, batched_at, escaped_db, escaped_table
-        )
-    else:
-        select_sql = "SELECT {} FROM {}.{}".format(
-            ",".join(escaped_columns), escaped_db, escaped_table
-        )
-
+    select_sql = "SELECT {} FROM {}.{}".format(
+        ",".join(escaped_columns), escaped_db, escaped_table
+    )
+ 
     # escape percent signs
     select_sql = select_sql.replace("%", "%%")
     return select_sql
