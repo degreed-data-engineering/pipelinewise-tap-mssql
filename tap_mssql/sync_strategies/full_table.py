@@ -43,7 +43,7 @@ def write_dataframe_record(row, catalog_entry, stream_version,columns, table_str
     record = row.to_json() 
 
 
-    record_message = row_to_singer_record(
+    record_message = common.row_to_singer_record(
         catalog_entry,
         stream_version,
         table_stream,
