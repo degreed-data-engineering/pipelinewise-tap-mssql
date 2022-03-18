@@ -38,10 +38,19 @@ def generate_bookmark_keys(catalog_entry):
 
 
 
+def get_write_message(stream_name, record, version, time_extracted):
+
+
+    return singer.RecordMessage(
+        stream=table_stream,
+        record=rec,
+        version=version,
+        time_extracted=time_extracted,
+    )
+
 
 def write_dataframe_record(row, table_stream, version, time_extracted):
     record = row.to_json() 
-    
     rec = {
         'type': 'RECORD',
         'stream': "dbo_OntologySources",
@@ -49,8 +58,12 @@ def write_dataframe_record(row, table_stream, version, time_extracted):
         'version': 1647360968793,
         'time_extracted': "2022-03-15T16:16:10.122319Z" #time_extracted
     }
-
     singer.write_message(rec)
+    # record_message = get_write_message(stream_name, record, version, time_extracted)
+    # singer.write_message(record_message)
+    # get_write_message() 
+    
+    # singer.write_message(stream_name, record, version, time_extracted)
     
     # return singer.RecordMessage(
     #     stream=table_stream,
