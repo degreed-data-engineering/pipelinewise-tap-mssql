@@ -102,7 +102,7 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
 
 
         params = {}
-
+        columns.sort()
         select_sql = common.generate_select_sql(catalog_entry, columns, fastsync=True)
         #escaped_columns = [common.escape(c) for c in columns]
 
