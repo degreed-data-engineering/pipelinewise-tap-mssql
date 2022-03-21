@@ -7,7 +7,7 @@ import singer
 from singer import metadata
 from singer import utils
 import singer.metrics as metrics
-
+import sys
 import tap_mssql.sync_strategies.common as common
 
 from tap_mssql.connection import (
@@ -122,7 +122,11 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
             #query_df.apply(write_dataframe_record, args=(catalog_entry,stream_version, columns, table_stream, time_extracted), axis=1)
 
         singer_message = {"type": "FASTSYNC","stream":table_stream, "version": stream_version }
-        singer.write_message(singer_message)
+        LOGGER.info('**PR** LINE 125 MESSAGE')
+        lOGGER.info(singer_message)
+        #singer.write_message(singer_message)
+        sys.stdout.write(singer_message+ '\n')
+        sys.stdout.flush()
     else: 
 
         with mssql_conn.connect() as open_conn:
