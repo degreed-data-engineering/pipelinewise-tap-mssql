@@ -104,12 +104,12 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
         params = {}
 
         select_sql = common.generate_select_sql(catalog_entry, columns, fastsync=True)
-        escaped_columns = [common.escape(c) for c in columns]
+        #escaped_columns = [common.escape(c) for c in columns]
 
        # LOGGER.info('**PR 103*** escaped columns')
        # LOGGER.info(escaped_columns)
-        #escaped_columns.extend(['_SDC_EXTRACTED_AT','_SDC_BATCHED_AT'])
-    
+        columns.extend(['_SDC_EXTRACTED_AT','_SDC_DELETED_AT','_SDC_BATCHED_AT'])
+        
         query_df = df = pd.DataFrame(columns=columns) 
 
         time_extracted = utils.now() 
@@ -132,7 +132,7 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
             LOGGER.info('**PR** line 440 filepath')
             LOGGER.info(filepath)
 
-            query_df.to_csv(f'{filepath}', sep=',', encoding='utf-8',index=False, compression='gzip')
+            query_df.to_csv(f'{filepath}', sep=',', encoding='utf-8',index=False,header=False, compression='gzip')
             files.append(filename)
             #common.create_gzip(query_df, catalog_entry, csv_saved, table_stream)
             #query_df.apply(write_dataframe_record, args=(catalog_entry,stream_version, columns, table_stream, time_extracted), axis=1)
