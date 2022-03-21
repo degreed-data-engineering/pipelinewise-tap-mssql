@@ -347,8 +347,10 @@ def gen_export_filename(
 
     if not ext:
         ext = 'csv.gz'
-
-    return 'pipelinewise_tap_mssql_{}_{}_fastsync_{}.{}'.format(
+#pipelinewise_dbo_UserOrganizations_20220309-213646-973674_batch_tfta0tpw.csv.gz
+#pipelinewise_OntologySources_20220321-034721-798507_batch_40L6IJNP.csv.gz
+# pipelinewise_{table_stream}_{}
+    return 'pipelinewise_{}_{}_batch_{}.{}'.format(
         table, suffix, postfix, ext
     )
 
@@ -433,9 +435,9 @@ def copy_table(
 
 
 
-def create_gzip(query_df,catalog_entry,csv_saved):
-
-    filename = gen_export_filename(table=catalog_entry.table)
+def create_gzip(query_df,catalog_entry,csv_saved,table_stream):
+    
+    filename = gen_export_filename(table=table_stream)
     filepath = os.path.join('fastsync', filename)
     LOGGER.info('**PR** line 440 filepath')
     LOGGER.info(filepath)

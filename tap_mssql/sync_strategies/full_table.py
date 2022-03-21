@@ -118,12 +118,10 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
             #LOGGER.info("**PR** line 89 df:")
 
             csv_saved += 1
-            common.create_gzip(query_df, catalog_entry, csv_saved)
+            common.create_gzip(query_df, catalog_entry, csv_saved, table_stream)
             #query_df.apply(write_dataframe_record, args=(catalog_entry,stream_version, columns, table_stream, time_extracted), axis=1)
 
-        singer_message = "{'type': 'FASTSYNC','stream':'{}','version':'{}'".format(
-            table_stream, stream_version
-            )
+        singer_message = {"type": "FASTSYNC","stream":table_stream, "version": stream_version }
         singer.write_message(singer_message)
     else: 
 
