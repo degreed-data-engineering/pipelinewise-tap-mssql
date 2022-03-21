@@ -268,9 +268,6 @@ def sync_query(
 
 # def fetch_current_incremental_key_pos(self, table, replication_key):
 
-
-
-
 def fastsync_query(
     cursor,
     catalog_entry,
@@ -433,3 +430,15 @@ def copy_table(
     #     )
 
  
+
+
+
+def create_gzip(query_df,catalog_entry,csv_saved):
+
+    filename = gen_export_filename(table=catalog_entry.table)
+    filepath = os.path.join('fastsync', filename)
+    LOGGER.info('**PR** line 440 filepath')
+    LOGGER.info(filepath)
+
+    query_df.to_csv(f'{filepath}.csv.gz', sep=',', encoding='utf-8',index=False, compression='gzip')
+

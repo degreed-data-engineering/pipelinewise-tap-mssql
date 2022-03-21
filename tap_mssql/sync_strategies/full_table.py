@@ -108,13 +108,18 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
 
         time_extracted = utils.now() 
         conn = mssql_conn.connect().execution_options(stream_results=True)
-        for chunk_dataframe in pd.read_sql(select_sql, conn, chunksize=1000000):
+
+        csv_saved = 0
+        chunk_size = 100000
+        for chunk_dataframe in pd.read_sql(select_sql, conn, chunksize=chunk_size):
             #LOGGER.info(chunk_dataframe)
             #print(f"Got dataframe w/{len(chunk_dataframe)} rows")
             query_df = query_df.append(chunk_dataframe, ignore_index=True)
             #LOGGER.info("**PR** line 89 df:")
-        
-            query_df.apply(write_dataframe_record, args=(catalog_entry,stream_version, columns, table_stream, time_extracted), axis=1)
+
+            csv_saved += 1
+            common.create_gzip(query_df, catalog_entry, csv_saved)
+            #query_df.apply(write_dataframe_record, args=(catalog_entry,stream_version, columns, table_stream, time_extracted), axis=1)
 
  
 
