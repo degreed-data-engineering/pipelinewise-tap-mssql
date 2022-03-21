@@ -440,5 +440,5 @@ def create_gzip(query_df,catalog_entry,csv_saved):
     LOGGER.info('**PR** line 440 filepath')
     LOGGER.info(filepath)
 
-    query_df.to_csv(f'{filepath}.csv.gz', sep=',', encoding='utf-8',index=False, compression='gzip')
+    query_df.to_csv(f'{filepath}', sep=',', encoding='utf-8',index=False, compression='gzip')
 
