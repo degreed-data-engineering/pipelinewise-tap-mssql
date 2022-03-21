@@ -100,7 +100,7 @@ def generate_select_sql(catalog_entry, columns, fastsync=False):
     escaped_db = escape(database_name)
     escaped_table = escape(catalog_entry.table)
     escaped_columns = [escape(c) for c in columns]
-    if fastync:
+    if fastsync:
         time_extracted = utils.now()
         _sdc_extracted_at = f"'{time_extracted}' as _SDC_EXTRACTED_AT"
         _sdc_deleted_at = f"NULL as _SDC_DELETED_AT"
