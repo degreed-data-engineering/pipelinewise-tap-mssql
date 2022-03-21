@@ -125,7 +125,7 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
         LOGGER.info('**PR** LINE 125 MESSAGE')
         LOGGER.info(singer_message)
         #singer.write_message(singer_message)
-        sys.stdout.write(singer_message+ '\n')
+        sys.stdout.write(str(singer_message) + '\n')
         sys.stdout.flush()
     else: 
 
