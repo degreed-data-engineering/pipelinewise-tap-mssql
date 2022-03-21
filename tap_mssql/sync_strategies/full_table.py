@@ -133,7 +133,7 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
             LOGGER.info(filepath)
 
             query_df.to_csv(f'{filepath}', sep=',', encoding='utf-8',index=False, compression='gzip')
-            files.append(filepath)
+            files.append(filename)
             #common.create_gzip(query_df, catalog_entry, csv_saved, table_stream)
             #query_df.apply(write_dataframe_record, args=(catalog_entry,stream_version, columns, table_stream, time_extracted), axis=1)
         
