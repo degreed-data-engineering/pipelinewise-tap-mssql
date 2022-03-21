@@ -2,12 +2,17 @@
 # pylint: disable=duplicate-code,too-many-locals,simplifiable-if-expression
 
 import copy
+import csv
+import datetime
 import json
 import pandas as pd
+import os
+import secrets
 import singer
 from singer import metadata
 from singer import utils
 import singer.metrics as metrics
+import string
 import sys
 import tap_mssql.sync_strategies.common as common
 
@@ -112,6 +117,7 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
 
         csv_saved = 0
         chunk_size = 100000
+        files = []
         for chunk_dataframe in pd.read_sql(select_sql, conn, chunksize=chunk_size):
             #LOGGER.info(chunk_dataframe)
             #print(f"Got dataframe w/{len(chunk_dataframe)} rows")
@@ -119,10 +125,22 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
             #LOGGER.info("**PR** line 89 df:")
 
             csv_saved += 1
-            common.create_gzip(query_df, catalog_entry, csv_saved, table_stream)
+
+
+            filename = gen_export_filename(table=table_stream)
+            filepath = os.path.join('fastsync', filename)
+            LOGGER.info('**PR** line 440 filepath')
+            LOGGER.info(filepath)
+
+            query_df.to_csv(f'{filepath}', sep=',', encoding='utf-8',index=False, compression='gzip')
+            files.append(filepath)
+            #common.create_gzip(query_df, catalog_entry, csv_saved, table_stream)
             #query_df.apply(write_dataframe_record, args=(catalog_entry,stream_version, columns, table_stream, time_extracted), axis=1)
         
-        singer_message = {'type': 'FASTSYNC','stream':table_stream, 'version': stream_version }
+
+        LOGGER.info('**PR** LINE 141 files')
+        LOGGER.info(files)
+        singer_message = {'type': 'FASTSYNC','stream':table_stream, 'version': stream_version, 'files':files }
         LOGGER.info('**PR** LINE 125 MESSAGE')
         LOGGER.info(singer_message)
         #singer.write_message(singer_message)
@@ -159,3 +177,55 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
         singer.clear_bookmark(state, catalog_entry.tap_stream_id, "last_pk_fetched")
 
         singer.write_message(activate_version_message)
+
+
+
+def generate_random_string(length: int = 8) -> str:
+    """
+    Generate cryptographically secure random strings
+    Uses best practice from Python doc https://docs.python.org/3/library/secrets.html#recipes-and-best-practices
+    Args:
+        length: length of the string to generate
+    Returns: random string
+    """
+
+    if length < 1:
+        raise Exception('Length must be at least 1!')
+
+    if 0 < length < 8:
+        warnings.warn('Length is too small! consider 8 or more characters')
+
+    return ''.join(
+        secrets.choice(string.ascii_uppercase + string.digits) for _ in range(length)
+    )
+
+def gen_export_filename(
+    table: str, suffix: str = None, postfix: str = None, ext: str = None
+) -> str:
+    """
+    Generates a unique filename used for exported fastsync data that avoids file name collision
+    Default pattern:
+        pipelinewise_<tap_id>_<table>_<timestamp_with_ms>_fastsync_<random_string>.csv.gz
+    Args:
+        tap_id: Unique tap id
+        table: Name of the table to export
+        suffix: Generated filename suffix. Defaults to current timestamp in milliseconds
+        postfix: Generated filename postfix. Defaults to a random 8 character length string
+        ext: Filename extension. Defaults to .csv.gz
+    Returns:
+        Unique filename as a string
+    """
+    if not suffix:
+        suffix = datetime.datetime.now().strftime('%Y%m%d-%H%M%S-%f')
+
+    if not postfix:
+        postfix = generate_random_string()
+
+    if not ext:
+        ext = 'csv.gz'
+#pipelinewise_dbo_UserOrganizations_20220309-213646-973674_batch_tfta0tpw.csv.gz
+#pipelinewise_OntologySources_20220321-034721-798507_batch_40L6IJNP.csv.gz
+# pipelinewise_{table_stream}_{}
+    return 'pipelinewise_{}_{}_batch_{}.{}'.format(
+        table, suffix, postfix, ext
+    )
