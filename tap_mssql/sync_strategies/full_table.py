@@ -86,7 +86,7 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
     ):
         singer.write_message(activate_version_message)
 
-        
+        # TODO: delete these when done
         LOGGER.info('**PR** Line 65')
         LOGGER.info(f'bookmark: {bookmark}')
         LOGGER.info(f'version_exists: {version_exists}')
@@ -100,14 +100,10 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
         LOGGER.info(f'stream_version: {stream_version}')
         LOGGER.info(f'state: {state}')
 
-
         params = {}
         columns.sort()
         select_sql = common.generate_select_sql(catalog_entry, columns, fastsync=True)
-        #escaped_columns = [common.escape(c) for c in columns]
-
-       # LOGGER.info('**PR 103*** escaped columns')
-       # LOGGER.info(escaped_columns)
+ 
         columns.extend(['_SDC_EXTRACTED_AT','_SDC_DELETED_AT','_SDC_BATCHED_AT'])
         
         query_df = df = pd.DataFrame(columns=columns) 
@@ -116,41 +112,24 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
         conn = mssql_conn.connect().execution_options(stream_results=True)
 
         csv_saved = 0
-        chunk_size = 100000
+        #chunk_size = 100000 TODO: delete this later
+        chunk_size = config.get("export_batch_rows")
         files = []
         for chunk_dataframe in pd.read_sql(select_sql, conn, chunksize=chunk_size):
-            #LOGGER.info(chunk_dataframe)
-            #print(f"Got dataframe w/{len(chunk_dataframe)} rows")
-            #query_df = query_df.append(chunk_dataframe, ignore_index=True)
-            #LOGGER.info("**PR** line 89 df:")
-
             csv_saved += 1
-
-
             filename = gen_export_filename(table=table_stream)
             filepath = os.path.join('fastsync', filename)
-            LOGGER.info('**PR** line 440 filepath')
-            LOGGER.info(filepath)
-
-           #query_df.to_csv(f'{filepath}', sep=',', encoding='utf-8',index=False,header=False, compression='gzip')
             chunk_dataframe.to_csv(f'{filepath}', sep=',', encoding='utf-8',index=False,header=False, compression='gzip')
             
-            files.append(filename)
-            #common.create_gzip(query_df, catalog_entry, csv_saved, table_stream)
-            #query_df.apply(write_dataframe_record, args=(catalog_entry,stream_version, columns, table_stream, time_extracted), axis=1)
-        
+            files.append(filename) 
 
-        LOGGER.info('**PR** LINE 141 files')
-        LOGGER.info(files)
+        # creating singer-like record to signify FASTSYNC for initial sync
         singer_message = {'type': 'FASTSYNC','stream':table_stream, 'version': stream_version, 'files':files }
-        LOGGER.info('**PR** LINE 125 MESSAGE')
-        LOGGER.info(singer_message)
-        #singer.write_message(singer_message)
+        LOGGER.info(singer_message) 
         json_object = json.dumps(singer_message) 
         sys.stdout.write(str(json_object) + '\n')
         sys.stdout.flush()
     else: 
-
         with mssql_conn.connect() as open_conn:
             LOGGER.info("Generating select_sql")
             select_sql = common.generate_select_sql(catalog_entry, columns)
