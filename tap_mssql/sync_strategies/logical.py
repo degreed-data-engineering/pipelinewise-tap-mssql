@@ -33,6 +33,7 @@ class log_based_sync:
         self.logger = singer.get_logger()
         self.config = config
         self.catalog_entry = catalog_entry
+        self.run_current_log_version = self._get_current_log_version()
         self.state = state
         self.columns = columns
         self.database_name = config.get("database")
@@ -298,12 +299,11 @@ class log_based_sync:
                     row = results.fetchone()
 
                 if not rows_updated: # updates the state if no new records have been added
-                    self.current_log_version = self._get_current_log_version() 
                     self.state = singer.write_bookmark(
                         self.state,
                         self.catalog_entry.tap_stream_id,
                         "current_log_version",
-                        self.current_log_version,
+                        self.run_current_log_version, # current log version before min version is pulled
                     ) 
 
             singer.write_message(singer.StateMessage(value=copy.deepcopy(self.state)))
