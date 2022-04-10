@@ -213,6 +213,7 @@ class log_based_sync:
     def execute_log_based_sync(self):
         "Confirm we have state and run a log based query. This will be larger."
 
+        run_current_log_version = self._get_current_log_version()
         self.logger.debug(f"Catalog Entry: {self.catalog_entry}")
 
         key_properties = common.get_key_properties(self.catalog_entry)
@@ -233,7 +234,7 @@ class log_based_sync:
 
             if self.catalog_entry.tap_stream_id == "dbo-InputMetadata":
                 prev_converter = modify_ouput_converter(open_conn)
- 
+
             results = open_conn.execute(ct_sql_query)
 
             row = results.fetchone()
@@ -244,7 +245,7 @@ class log_based_sync:
                 counter.tags["table"] = self.table_name
 
                 rows_updated = False # Checks to see if there are any new records.  If not then records state below
-                
+
                 while row:
                     rows_updated = True
                     counter.increment()
@@ -298,19 +299,18 @@ class log_based_sync:
                     row = results.fetchone()
 
                 if not rows_updated: # updates the state if no new records have been added
-                    self.current_log_version = self._get_current_log_version() 
                     self.state = singer.write_bookmark(
                         self.state,
                         self.catalog_entry.tap_stream_id,
                         "current_log_version",
-                        self.current_log_version,
-                    ) 
+                        run_current_log_version, # current log version before min version is pulled
+                    )
 
             singer.write_message(singer.StateMessage(value=copy.deepcopy(self.state)))
 
             if self.catalog_entry.tap_stream_id == "dbo-InputMetadata":
                 revert_ouput_converter(open_conn, prev_converter)
-        
+
     def _build_ct_sql_query(self, key_properties):
         """Using Selected columns, return an SQL query to select updated records from Change Tracking"""
         # Order column list in alphabetical order starting with key_properties then other columns
