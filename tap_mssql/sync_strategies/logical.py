@@ -205,6 +205,7 @@ class log_based_sync:
                 self.logger.info(
                     "CHANGE_TRACKING_MIN_VALID_VERSION has reported a value greater than current-log-version. Executing a full table sync."
                 )
+                self.current_log_version = self._get_current_log_version()
                 return True
             else:
                 return False
@@ -212,6 +213,7 @@ class log_based_sync:
     def execute_log_based_sync(self):
         "Confirm we have state and run a log based query. This will be larger."
 
+        run_current_log_version = self._get_current_log_version()
         self.logger.debug(f"Catalog Entry: {self.catalog_entry}")
 
         key_properties = common.get_key_properties(self.catalog_entry)
@@ -242,7 +244,10 @@ class log_based_sync:
                 counter.tags["database"] = self.database_name
                 counter.tags["table"] = self.table_name
 
+                rows_updated = False # Checks to see if there are any new records.  If not then records state below
+
                 while row:
+                    rows_updated = True
                     counter.increment()
                     desired_columns = []
                     ordered_row = []
@@ -292,6 +297,14 @@ class log_based_sync:
                     self.current_log_version = row["sys_change_version"]
                     # do more
                     row = results.fetchone()
+
+                if not rows_updated: # updates the state if no new records have been added
+                    self.state = singer.write_bookmark(
+                        self.state,
+                        self.catalog_entry.tap_stream_id,
+                        "current_log_version",
+                        run_current_log_version, # current log version before min version is pulled
+                    )
 
             singer.write_message(singer.StateMessage(value=copy.deepcopy(self.state)))
 
