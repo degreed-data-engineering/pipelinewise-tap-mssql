@@ -36,9 +36,8 @@ def generate_bookmark_keys(catalog_entry):
         "version",
         "initial_full_table_complete",
     }
-
+    
     bookmark_keys = base_bookmark_keys
-
     return bookmark_keys
 
 def write_dataframe_record(row, catalog_entry, stream_version, columns, table_stream, time_extracted):
@@ -173,9 +172,7 @@ def gen_export_filename(
 
     if not ext:
         ext = 'csv.gz'
-#pipelinewise_dbo_UserOrganizations_20220309-213646-973674_batch_tfta0tpw.csv.gz
-#pipelinewise_OntologySources_20220321-034721-798507_batch_40L6IJNP.csv.gz
-# pipelinewise_{table_stream}_{}
+
     return 'pipelinewise_{}_{}_batch_{}.{}'.format(
         table, suffix, postfix, ext
     )
