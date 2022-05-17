@@ -117,10 +117,9 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
         files = []
         for chunk_dataframe in pd.read_sql(select_sql, conn, chunksize=chunk_size):
             csv_saved += 1
+
             filename = gen_export_filename(table=table_stream)
             filepath = os.path.join('fastsync', filename)
-            os.mkdir(filepath)
-            
             chunk_dataframe.to_csv(f'{filepath}', sep=',', encoding='utf-8',index=False,header=False, compression='gzip')
             
             files.append(filename) 
@@ -176,7 +175,7 @@ def generate_random_string(length: int = 8) -> str:
         raise Exception('Length must be at least 1!')
 
     if 0 < length < 8:
-        warnings.warn('Length is too small! consider 8 or more characters')
+        LOGGER.info('Length is too small! consider 8 or more characters')
 
     return ''.join(
         secrets.choice(string.ascii_uppercase + string.digits) for _ in range(length)
