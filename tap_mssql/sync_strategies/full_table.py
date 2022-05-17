@@ -154,11 +154,11 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
             if catalog_entry.tap_stream_id == "dbo-InputMetadata":
                 revert_ouput_converter(open_conn, prev_converter)
 
-        # clear max pk value and last pk fetched upon successful sync
-        singer.clear_bookmark(state, catalog_entry.tap_stream_id, "max_pk_values")
-        singer.clear_bookmark(state, catalog_entry.tap_stream_id, "last_pk_fetched")
+    # clear max pk value and last pk fetched upon successful sync
+    singer.clear_bookmark(state, catalog_entry.tap_stream_id, "max_pk_values")
+    singer.clear_bookmark(state, catalog_entry.tap_stream_id, "last_pk_fetched")
 
-        singer.write_message(activate_version_message)
+    singer.write_message(activate_version_message)
 
 
 
