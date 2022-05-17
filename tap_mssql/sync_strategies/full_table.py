@@ -25,7 +25,6 @@ from tap_mssql.connection import (
 
 LOGGER = singer.get_logger()
 
-
 def generate_bookmark_keys(catalog_entry):
     md_map = metadata.to_map(catalog_entry.metadata)
     stream_metadata = md_map.get((), {})
@@ -42,9 +41,6 @@ def generate_bookmark_keys(catalog_entry):
 
     return bookmark_keys
 
-
-
- 
 def write_dataframe_record(row, catalog_entry, stream_version, columns, table_stream, time_extracted):
     
     rec = row.to_dict() 
@@ -86,29 +82,20 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
     ):
         singer.write_message(activate_version_message)
 
-        # TODO: delete these when done
-        LOGGER.info('**PR** Line 65')
-        LOGGER.info(f'bookmark: {bookmark}')
-        LOGGER.info(f'version_exists: {version_exists}')
-        LOGGER.info(f'initial_full_table_complete: {initial_full_table_complete}')
-        LOGGER.info(f'state_version: {state_version}')
-        LOGGER.info(f'table_stream: {table_stream}')
-        LOGGER.info(f'active_version_message: {activate_version_message}') 
-        LOGGER.info(f'catalog_entry: {catalog_entry}')
-        LOGGER.info(f'catalog_entry.metadata: {catalog_entry.metadata}')
-        LOGGER.info(f'columns: {columns}')
-        LOGGER.info(f'stream_version: {stream_version}')
-        LOGGER.info(f'state: {state}')
-
+    with mssql_conn.connect() as open_conn:
         params = {}
+
+        if catalog_entry.tap_stream_id == "dbo-InputMetadata":
+            prev_converter = modify_ouput_converter(open_conn)
+
         columns.sort()
         select_sql = common.generate_select_sql(catalog_entry, columns, fastsync=True)
  
         columns.extend(['_SDC_EXTRACTED_AT','_SDC_DELETED_AT','_SDC_BATCHED_AT'])
         
-        query_df = df = pd.DataFrame(columns=columns) 
+        query_df = df = pd.DataFrame(columns=columns) #TODO: delete?
+        time_extracted = utils.now() #TODO: delete?
 
-        time_extracted = utils.now() 
         conn = mssql_conn.connect().execution_options(stream_results=True)
 
         csv_saved = 0
@@ -130,29 +117,10 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
         json_object = json.dumps(singer_message) 
         sys.stdout.write(str(json_object) + '\n')
         sys.stdout.flush()
-    else: 
-        with mssql_conn.connect() as open_conn:
-            LOGGER.info("Generating select_sql")
-            select_sql = common.generate_select_sql(catalog_entry, columns)
 
-            params = {}
-
-            if catalog_entry.tap_stream_id == "dbo-InputMetadata":
-                prev_converter = modify_ouput_converter(open_conn)
-
-            common.sync_query(
-                open_conn,
-                catalog_entry,
-                state,
-                select_sql,
-                columns,
-                stream_version,
-                table_stream,
-                params,
-            )
-
-            if catalog_entry.tap_stream_id == "dbo-InputMetadata":
-                revert_ouput_converter(open_conn, prev_converter)
+        if catalog_entry.tap_stream_id == "dbo-InputMetadata":
+            revert_ouput_converter(open_conn, prev_converter)
+        
 
     # clear max pk value and last pk fetched upon successful sync
     singer.clear_bookmark(state, catalog_entry.tap_stream_id, "max_pk_values")
