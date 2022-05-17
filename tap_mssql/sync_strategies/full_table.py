@@ -81,6 +81,7 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
     ):
         singer.write_message(activate_version_message)
 
+    #TODO: Update code: If fastsync_batch_rows is not set, use old non fastsync method
     with mssql_conn.connect() as open_conn:
         params = {}
 
