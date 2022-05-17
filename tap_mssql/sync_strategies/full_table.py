@@ -36,7 +36,7 @@ def generate_bookmark_keys(catalog_entry):
         "version",
         "initial_full_table_complete",
     }
-    
+
     bookmark_keys = base_bookmark_keys
     return bookmark_keys
 
@@ -99,7 +99,7 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
 
         csv_saved = 0
         
-        chunk_size = config.get("export_batch_rows") #TODO: update this so that its not required (if not set, fastsync disabled)
+        chunk_size = config.get("fastsync_batch_rows") #TODO: update this so that its not required (if not set, fastsync disabled)
         files = []
         for chunk_dataframe in pd.read_sql(select_sql, conn, chunksize=chunk_size):
             csv_saved += 1
