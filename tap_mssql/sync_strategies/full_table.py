@@ -89,7 +89,7 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
             prev_converter = modify_ouput_converter(open_conn)
 
         columns.sort()
-        select_sql = common.generate_select_sql(catalog_entry, columns, fastsync=True)
+        select_sql = common.fast_sync_generate_select_sql(catalog_entry, columns)
  
         columns.extend(['_SDC_EXTRACTED_AT','_SDC_DELETED_AT','_SDC_BATCHED_AT'])
         
@@ -121,14 +121,10 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
         if catalog_entry.tap_stream_id == "dbo-InputMetadata":
             revert_ouput_converter(open_conn, prev_converter)
         
-
     # clear max pk value and last pk fetched upon successful sync
     singer.clear_bookmark(state, catalog_entry.tap_stream_id, "max_pk_values")
     singer.clear_bookmark(state, catalog_entry.tap_stream_id, "last_pk_fetched")
-
     singer.write_message(activate_version_message)
-
-
 
 def generate_random_string(length: int = 8) -> str:
     """
@@ -143,7 +139,7 @@ def generate_random_string(length: int = 8) -> str:
         raise Exception('Length must be at least 1!')
 
     if 0 < length < 8:
-        LOGGER.info('Length is too small! consider 8 or more characters')
+        LOGGER.warn('Length is too small! consider 8 or more characters')
 
     return ''.join(
         secrets.choice(string.ascii_uppercase + string.digits) for _ in range(length)
