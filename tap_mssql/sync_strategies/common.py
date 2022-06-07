@@ -2,17 +2,10 @@
 # pylint: disable=too-many-arguments,duplicate-code,too-many-locals
 
 import copy
-import csv
 import datetime
-import multiprocessing 
-import os
-import secrets
 import singer
-import string
 import time
 import uuid
-
-from . import split_gzip 
 
 import singer.metrics as metrics
 from singer import metadata
