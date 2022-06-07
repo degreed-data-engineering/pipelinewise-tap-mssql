@@ -67,7 +67,8 @@ Create a config file containing the database connection credentials, e.g.:
   "port": "3306",
   "user": "root",
   "password": "password",
-  "include_schemas_in_destination_stream_name": true
+  "include_schemas_in_destination_stream_name": true,
+  "fastsync_batch_rows": 100000
 }
 ```
 
@@ -295,6 +296,10 @@ specified in the table's metadata as well.
 
 Log based replication works in conjunction with a state file to extract
 new and changed records that have been recorded by SQL Server Change Tracking each time the tap is invoked. This requires change tracking to be enabled on the source database as well as each table to be replicated with this method. The initial sync with this method will default to full table, and log based replication will occur on subsequent runs.
+
+## FastSync
+
+Any Full Table replication, or initial full sync for a Log Based extract, will use FasySync, an altertative method that bypasses the singer spec, sepcifically the RECORD row, in order to decrease duration times. Defining a value for the config fastsync_batch_rows will set the batch number of records synced at a time for each table. 
 
 #### Examples
 
