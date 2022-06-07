@@ -22,6 +22,7 @@ setup(
         "backoff==1.8.0",
         "MarkupSafe==2.0.1",
         "jinja2==2.11.3",
+        "pandas==1.2.2",
     ],
     entry_points="""
           [console_scripts]
