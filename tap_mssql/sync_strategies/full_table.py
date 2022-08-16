@@ -115,8 +115,8 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
             chunk_dataframe.replace({'\"': '\\\\'}, regex=True, inplace=True)
             chunk_dataframe.replace({'\\\\': '\\\\\\"'}, regex=True, inplace=True)
             chunk_dataframe.replace({'\"\"': '\"'}, regex=True, inplace=True)
-            chunk_dataframe.replace({r'\"\"': r'\"'}, regex=True, inplace=True)
-            
+            chunk_dataframe.replace({r'\"\"': '\"'}, regex=True, inplace=True)
+        
             #chunk_dataframe.replace({r'\"': '\\\\\\'}, regex=True, inplace=True)
             
             #chunk_dataframe.replace({'\""': '\\\"'}, regex=True, inplace=True)
