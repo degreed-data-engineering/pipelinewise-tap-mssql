@@ -107,9 +107,8 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
 
         chunk_size = config.get("fastsync_batch_rows") #TODO: update this so that its not required (if not set, fastsync disabled)
         files = []
-        for chunk_dataframe in pd.read_sql(select_sql, conn, chunksize=chunk_size):
+        for chunk_dataframe in pd.read_sql(select_sql, conn, chunksize=chunk_size, escapechar="\\"):
             csv_saved += 1
-
 
             filename = gen_export_filename(table=table_stream)
             filepath = os.path.join('fastsync', filename)
@@ -131,8 +130,8 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
             #chunk_dataframe.replace({'""': ''}, regex=True, inplace=True)
             
             
-            chunk_dataframe.replace({'\"': '\\"'}, regex=True, inplace=True)
-            chunk_dataframe.to_csv(f'{filepath}', sep=',', quotechar='\"', encoding='utf-8',index=False,header=False, compression='gzip', quoting=csv.QUOTE_ALL)
+            #chunk_dataframe.replace({'\"': '\\'}, regex=True, inplace=True)
+            chunk_dataframe.to_csv(f'{filepath}', sep=',', quotechar='\"', encoding='utf-8',index=False,header=False, compression='gzip', quoting=csv.QUOTE_ALL,doublequote=False)
 
 
             files.append(filename) 
