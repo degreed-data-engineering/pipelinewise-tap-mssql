@@ -9,6 +9,7 @@ import pandas as pd
 import os
 import secrets
 import singer
+from io import StringIO
 from singer import metadata
 from singer import utils
 import singer.metrics as metrics
@@ -139,8 +140,8 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
             #works:
             #chunk_dataframe.replace({'\\\\': ''}, regex=True, inplace=True)
             
-            chunk_dataframe.replace({'\\': '\\\\'}, regex=True, inplace=True)
-            chunk_dataframe.to_csv(f'{filepath}', sep=',', quotechar='"', encoding='utf-8', index=False, header=False, compression='gzip', quoting=csv.QUOTE_ALL)
+            #chunk_dataframe.replace({'\\': '\\\\'}, regex=True, inplace=True)
+            chunk_dataframe.to_csv(f'{filepath}', sep=',', quotechar='"""', encoding='utf-8', index=False, header=False, compression='gzip', quoting=csv.QUOTE_ALL)
 
 
             files.append(filename) 
