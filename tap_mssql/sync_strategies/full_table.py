@@ -107,7 +107,7 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
 
         chunk_size = config.get("fastsync_batch_rows") #TODO: update this so that its not required (if not set, fastsync disabled)
         files = []
-        for chunk_dataframe in pd.read_sql(select_sql, conn, chunksize=chunk_size).replace(r'/"','', regex=True):
+        for chunk_dataframe in pd.read_sql(select_sql, conn, chunksize=chunk_size).replace('/"','', regex=True):
             csv_saved += 1
 
 
