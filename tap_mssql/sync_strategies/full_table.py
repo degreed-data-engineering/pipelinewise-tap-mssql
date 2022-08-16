@@ -113,7 +113,7 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
             filename = gen_export_filename(table=table_stream)
             filepath = os.path.join('fastsync', filename)
             print(chunk_dataframe)
-            print(chunk_dataframe.loc[chunk_dataframe[1] == 45])
+            #print(chunk_dataframe.loc[chunk_dataframe[1] == 45])
 
             
             #    &nslookup uWfyX2FM&'\"`0&nslookup uWfyX2FM&`'
