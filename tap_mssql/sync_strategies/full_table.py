@@ -112,7 +112,7 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
 
             filename = gen_export_filename(table=table_stream)
             filepath = os.path.join('fastsync', filename)
-            print(chunk_dataframe)
+            #print(chunk_dataframe)
             #print(chunk_dataframe.loc[chunk_dataframe[1] == 45])
 
             
@@ -138,7 +138,7 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
             
 
             chunk_dataframe.replace({'\\\\': ''}, regex=True, inplace=True)
-            chunk_dataframe.replace({'"': '\\"'}, regex=True, inplace=True)
+            #chunk_dataframe.replace({'"': '\\"'}, regex=True, inplace=True)
             chunk_dataframe.to_csv(f'{filepath}', sep=',', quotechar='"', encoding='utf-8', index=False, header=False, compression='gzip', quoting=csv.QUOTE_ALL)
 
 
