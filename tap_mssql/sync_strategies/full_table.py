@@ -127,11 +127,12 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
             
 
             # this one gives: &nslookup uWfyX2FM&'"`0&nslookup uWfyX2FM&`'
-            chunk_dataframe.replace({'\\\\': '\\'}, regex=True, inplace=True)
-           # chunk_dataframe.replace({'""': r'\\\"'}, regex=True, inplace=True)
-
+            #chunk_dataframe.replace({'\\\\': ''}, regex=True, inplace=True)
+            #chunk_dataframe.replace({'""': ''}, regex=True, inplace=True)
             
-            chunk_dataframe.to_csv(f'{filepath}', sep=',', quotechar='"', encoding='utf-8',index=False,header=False, compression='gzip', quoting=csv.QUOTE_ALL)
+            
+            chunk_dataframe.replace({'\"': '\\\"'}, regex=True, inplace=True)
+            chunk_dataframe.to_csv(f'{filepath}', sep=',', quotechar='\"', encoding='utf-8',index=False,header=False, compression='gzip', quoting=csv.QUOTE_ALL)
 
 
             files.append(filename) 
