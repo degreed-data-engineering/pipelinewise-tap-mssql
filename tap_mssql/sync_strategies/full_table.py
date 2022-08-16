@@ -86,43 +86,24 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
 
     with mssql_conn.connect() as open_conn:
         LOGGER.info("Generating select_sql")
+        select_sql = common.generate_select_sql(catalog_entry, columns)
 
         params = {}
 
         if catalog_entry.tap_stream_id == "dbo-InputMetadata":
             prev_converter = modify_ouput_converter(open_conn)
 
-
-        columns.sort()
-        select_sql = common.fast_sync_generate_select_sql(catalog_entry, columns)
-
-        columns.extend(['_SDC_EXTRACTED_AT','_SDC_DELETED_AT','_SDC_BATCHED_AT'])
-
-        query_df = df = pd.DataFrame(columns=columns) #TODO: delete?
-        time_extracted = utils.now() #TODO: delete?
-
-        conn = mssql_conn.connect().execution_options(stream_results=True)
-
-        csv_saved = 0
-
-        chunk_size = config.get("fastsync_batch_rows") #TODO: update this so that its not required (if not set, fastsync disabled)
-        files = []
-        for chunk_dataframe in pd.read_sql(select_sql, conn, chunksize=chunk_size):
-            csv_saved += 1
-
-            filename = gen_export_filename(table=table_stream)
-            filepath = os.path.join('fastsync', filename)
-            chunk_dataframe.to_csv(f'{filepath}', sep=',', encoding='utf-8',index=False,header=False, compression='gzip')
-
-            files.append(filename) 
-
-        # creating singer-like record to signify FASTSYNC for initial sync
-        singer_message = {'type': 'FASTSYNC','stream':table_stream, 'version': stream_version, 'files':files }
-        LOGGER.info(singer_message) 
-        json_object = json.dumps(singer_message) 
-        sys.stdout.write(str(json_object) + '\n')
-        sys.stdout.flush()
-
+        common.sync_query(
+            open_conn,
+            catalog_entry,
+            state,
+            select_sql,
+            columns,
+            stream_version,
+            table_stream,
+            params,
+        )
+    
         if catalog_entry.tap_stream_id == "dbo-InputMetadata":
             revert_ouput_converter(open_conn, prev_converter)
 
