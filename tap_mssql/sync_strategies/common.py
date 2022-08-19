@@ -112,7 +112,7 @@ def fast_sync_generate_select_sql(catalog_entry, columns):
     _sdc_deleted_at = "NULL as _SDC_DELETED_AT"
     _sdc_batched_at = f"'{time_extracted}' as _SDC_BATCHED_AT"
 
-    select_sql = "SELECT {}, {}, {}, {} FROM {}.{}".format(
+    select_sql = """SELECT {}, {}, {}, {} FROM {}.{}""".format(
         ",".join(escaped_columns), _sdc_extracted_at, _sdc_deleted_at, _sdc_batched_at, escaped_db, escaped_table
     )
 
