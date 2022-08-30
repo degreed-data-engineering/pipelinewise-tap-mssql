@@ -16,6 +16,7 @@ import singer.metrics as metrics
 import string
 import sys
 
+# import dask.dataframe as dd
 import tap_mssql.sync_strategies.common as common
 
 from tap_mssql.connection import (
@@ -107,6 +108,24 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
 
         chunk_size = config.get("fastsync_batch_rows") #TODO: update this so that its not required (if not set, fastsync disabled)
         files = []
+
+        # df = dd.read_sql(
+        #     select_sql,
+        #     conn,
+        #     blocksize=16 * 1024 * 1024, # 16MB chunks
+        # )
+
+        LOGGER.info("**PR** CONN:")
+        LOGGER.info(conn)
+
+        LOGGER.info("**PR** stream:")
+        LOGGER.info(table_stream)
+
+        LOGGER.info("**PR** catalog_entry:")
+        LOGGER.info(catalog_entry)
+
+
+
         for chunk_dataframe in pd.read_sql(select_sql, conn, chunksize=chunk_size):
             csv_saved += 1
 
