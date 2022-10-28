@@ -232,9 +232,6 @@ class log_based_sync:
         )
         with self.mssql_conn.connect() as open_conn:
 
-            if self.catalog_entry.tap_stream_id == "dbo-InputMetadata":
-                prev_converter = modify_ouput_converter(open_conn)
-
             results = open_conn.execute(ct_sql_query)
 
             row = results.fetchone()
@@ -307,9 +304,6 @@ class log_based_sync:
                     )
 
             singer.write_message(singer.StateMessage(value=copy.deepcopy(self.state)))
-
-            if self.catalog_entry.tap_stream_id == "dbo-InputMetadata":
-                revert_ouput_converter(open_conn, prev_converter)
 
     def _build_ct_sql_query(self, key_properties):
         """Using Selected columns, return an SQL query to select updated records from Change Tracking"""

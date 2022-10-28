@@ -90,9 +90,6 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
 
         params = {}
 
-        if catalog_entry.tap_stream_id == "dbo-InputMetadata":
-            prev_converter = modify_ouput_converter(open_conn)
-
         columns.sort()
         select_sql = common.fast_sync_generate_select_sql(catalog_entry, columns)
 
@@ -124,9 +121,6 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
         json_object = json.dumps(singer_message) 
         sys.stdout.write(str(json_object) + '\n')
         sys.stdout.flush()
-
-        if catalog_entry.tap_stream_id == "dbo-InputMetadata":
-            revert_ouput_converter(open_conn, prev_converter)
 
     # clear max pk value and last pk fetched upon successful sync
     singer.clear_bookmark(state, catalog_entry.tap_stream_id, "max_pk_values")
