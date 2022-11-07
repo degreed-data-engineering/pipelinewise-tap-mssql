@@ -118,7 +118,9 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
             filepath = os.path.join('fastsync', filename)
             
             chunk_dataframe.replace({'\\\\': r'\\\\'}, regex=True, inplace=True)
+            LOGGER.info(f"**PR** TRYING to_csv with csv: {csv_saved}") 
             chunk_dataframe.to_csv(f'{filepath}', sep=',', encoding='UTF-16', index=False, header=False, compression='gzip')
+            LOGGER.info(f"**PR** COMPLETED to_csv with csv: {csv_saved}") 
             
             files.append(filename) 
 
