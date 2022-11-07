@@ -66,6 +66,7 @@ def get_azure_sql_engine(config) -> Engine:
         "host": config["host"],
         "driver": "ODBC+Driver+17+for+SQL+Server",
         "database": config["database"],
+        "TrustServerCertificate": "yes",
     }
 
     conn_values["authentication"] = "SqlPassword"
