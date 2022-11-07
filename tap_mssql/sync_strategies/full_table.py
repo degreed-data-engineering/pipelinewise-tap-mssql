@@ -101,9 +101,13 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
         query_df = df = pd.DataFrame(columns=columns) #TODO: delete?
         time_extracted = utils.now() #TODO: delete?
 
+
+
+        
         conn = mssql_conn.connect().execution_options(stream_results=True)
 
         csv_saved = 0
+
 
         chunk_size = config.get("fastsync_batch_rows") #TODO: update this so that its not required (if not set, fastsync disabled)
         files = []
@@ -114,7 +118,7 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
             filepath = os.path.join('fastsync', filename)
             
             chunk_dataframe.replace({'\\\\': r'\\\\'}, regex=True, inplace=True)
-            chunk_dataframe.to_csv(f'{filepath}', sep=',', encoding='utf-8', index=False, header=False, compression='gzip')
+            chunk_dataframe.to_csv(f'{filepath}', sep=',', encoding='UTF-16', index=False, header=False, compression='gzip')
             
             files.append(filename) 
 
