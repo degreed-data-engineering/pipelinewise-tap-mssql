@@ -90,8 +90,8 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
 
         params = {}
 
-        if catalog_entry.tap_stream_id == "dbo-InputMetadata":
-            prev_converter = modify_ouput_converter(open_conn)
+        # if catalog_entry.tap_stream_id == "dbo-InputMetadata":
+        #     prev_converter = modify_ouput_converter(open_conn)
 
         columns.sort()
         select_sql = common.fast_sync_generate_select_sql(catalog_entry, columns)
@@ -101,8 +101,14 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
         query_df = df = pd.DataFrame(columns=columns) #TODO: delete?
         time_extracted = utils.now() #TODO: delete?
 
+
+
+        
         conn = mssql_conn.connect().execution_options(stream_results=True)
 
+        if catalog_entry.tap_stream_id == "dbo-InputMetadata":
+            prev_converter = modify_ouput_converter(conn)
+        
         csv_saved = 0
 
         chunk_size = config.get("fastsync_batch_rows") #TODO: update this so that its not required (if not set, fastsync disabled)
@@ -114,7 +120,9 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
             filepath = os.path.join('fastsync', filename)
             
             chunk_dataframe.replace({'\\\\': r'\\\\'}, regex=True, inplace=True)
+            LOGGER.info(f"**PR** TRYING to_csv with csv: {csv_saved}") 
             chunk_dataframe.to_csv(f'{filepath}', sep=',', encoding='utf-8', index=False, header=False, compression='gzip')
+            LOGGER.info(f"**PR** COMPLETED to_csv with csv: {csv_saved}") 
             
             files.append(filename) 
 
@@ -126,7 +134,7 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
         sys.stdout.flush()
 
         if catalog_entry.tap_stream_id == "dbo-InputMetadata":
-            revert_ouput_converter(open_conn, prev_converter)
+            revert_ouput_converter(conn, prev_converter)
 
     # clear max pk value and last pk fetched upon successful sync
     singer.clear_bookmark(state, catalog_entry.tap_stream_id, "max_pk_values")
