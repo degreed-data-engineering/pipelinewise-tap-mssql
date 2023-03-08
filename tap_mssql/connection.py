@@ -66,9 +66,10 @@ def get_azure_sql_engine(config) -> Engine:
         "host": config["host"],
         "driver": "ODBC+Driver+17+for+SQL+Server",
         "database": config["database"],
-    }
-    print("##PR##")
-    print(config.get('read_only'))
+    }          
+    LOGGER.info("##PR##")
+    LOGGER.info(config.get('read_only'))
+
     
     conn_values["authentication"] = "SqlPassword"
 
