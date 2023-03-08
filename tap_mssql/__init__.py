@@ -50,6 +50,7 @@ REQUIRED_CONFIG_KEYS = [
     "database",
     "user",
     "password",
+    "read_only",
 ]
 
 LOGGER = singer.get_logger()
