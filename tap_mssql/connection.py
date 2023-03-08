@@ -67,17 +67,16 @@ def get_azure_sql_engine(config) -> Engine:
         "driver": "ODBC+Driver+17+for+SQL+Server",
         "database": config["database"],
     }          
-    LOGGER.info("##PR##")
-    LOGGER.info(config.get('read_only'))
-
     
     conn_values["authentication"] = "SqlPassword"
 
-    if config.get('read_only'):
+    if config.get('read_only') == True:
         conn_values["applicationintent"] = "ReadOnly"
         raw_conn_string = "{prefix}{username}:{password}@{host}:\
     {port}/{database}?driver={driver}&Authentication={authentication}&\
     autocommit=True&IntegratedSecurity=False&ApplicationIntent={applicationintent}"
+        LOGGER.info(config.get('Using read only replica db'))
+
     else: 
         raw_conn_string = "{prefix}{username}:{password}@{host}:\
     {port}/{database}?driver={driver}&Authentication={authentication}&\
