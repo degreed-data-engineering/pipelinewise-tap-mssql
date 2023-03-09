@@ -75,7 +75,7 @@ def get_azure_sql_engine(config) -> Engine:
         raw_conn_string = "{prefix}{username}:{password}@{host}:\
     {port}/{database}?driver={driver}&Authentication={authentication}&\
     autocommit=True&IntegratedSecurity=False&ApplicationIntent={applicationintent}"
-        LOGGER.info(config.get('Using read only replica db'))
+        LOGGER.info('Using read only replica db')
 
     else: 
         raw_conn_string = "{prefix}{username}:{password}@{host}:\
