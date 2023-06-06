@@ -119,7 +119,7 @@ def fast_sync_generate_select_sql(catalog_entry, columns, dry_run_limit):
 
     if dry_run_limit:
         select_sql = """SELECT TOP {} {}, {}, {}, {} FROM {}.{}""".format(
-            dry_run_limit,",".join(escaped_columns), _sdc_extracted_at, _sdc_deleted_at, _sdc_batched_at, escaped_db, escaped_table
+            dry_run_limit, ",".join(escaped_columns), _sdc_extracted_at, _sdc_deleted_at, _sdc_batched_at, escaped_db, escaped_table
         )
     else:
         select_sql = """SELECT {}, {}, {}, {} FROM {}.{}""".format(
