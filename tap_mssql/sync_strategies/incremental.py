@@ -58,7 +58,8 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns):
     singer.write_message(activate_version_message)
     LOGGER.info("Beginning SQL")
     with mssql_conn.connect() as open_conn:
-        select_sql = common.generate_select_sql(catalog_entry, columns)
+        dry_run_limit = config.get("dry_run_limit")
+        select_sql = common.generate_select_sql(catalog_entry, columns, dry_run_limit)
         params = {}
 
         if replication_key_value is not None:

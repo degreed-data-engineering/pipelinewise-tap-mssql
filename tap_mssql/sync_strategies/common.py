@@ -87,21 +87,26 @@ def get_key_properties(catalog_entry):
     return key_properties
 
 
-def generate_select_sql(catalog_entry, columns):
+def generate_select_sql(catalog_entry, columns, dry_run_limit):
     database_name = get_database_name(catalog_entry)
     escaped_db = escape(database_name)
     escaped_table = escape(catalog_entry.table)
     escaped_columns = [escape(c) for c in columns]
-
-    select_sql = "SELECT {} FROM {}.{}".format(
-        ",".join(escaped_columns), escaped_db, escaped_table
-    )
+    
+    if dry_run_limit:
+        select_sql = "SELECT TOP {} {} FROM {}.{}".format(
+            dry_run_limit, ",".join(escaped_columns), escaped_db, escaped_table
+        )
+    else:
+        select_sql = "SELECT {} FROM {}.{}".format(
+            ",".join(escaped_columns), escaped_db, escaped_table
+        )
 
     # escape percent signs
     select_sql = select_sql.replace("%", "%%")
     return select_sql
 
-def fast_sync_generate_select_sql(catalog_entry, columns):
+def fast_sync_generate_select_sql(catalog_entry, columns, dry_run_limit):
     database_name = get_database_name(catalog_entry)
     escaped_db = escape(database_name)
     escaped_table = escape(catalog_entry.table)
@@ -112,9 +117,14 @@ def fast_sync_generate_select_sql(catalog_entry, columns):
     _sdc_deleted_at = "NULL as _SDC_DELETED_AT"
     _sdc_batched_at = f"'{time_extracted}' as _SDC_BATCHED_AT"
 
-    select_sql = """SELECT {}, {}, {}, {} FROM {}.{}""".format(
-        ",".join(escaped_columns), _sdc_extracted_at, _sdc_deleted_at, _sdc_batched_at, escaped_db, escaped_table
-    )
+    if dry_run_limit:
+        select_sql = """SELECT TOP {} {}, {}, {}, {} FROM {}.{}""".format(
+            dry_run_limit,",".join(escaped_columns), _sdc_extracted_at, _sdc_deleted_at, _sdc_batched_at, escaped_db, escaped_table
+        )
+    else:
+        select_sql = """SELECT {}, {}, {}, {} FROM {}.{}""".format(
+            ",".join(escaped_columns), _sdc_extracted_at, _sdc_deleted_at, _sdc_batched_at, escaped_db, escaped_table
+        )
 
     # escape percent signs
     select_sql = select_sql.replace("%", "%%")
