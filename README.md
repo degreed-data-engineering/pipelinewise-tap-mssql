@@ -68,8 +68,8 @@ Create a config file containing the database connection credentials, e.g.:
   "user": "root",
   "password": "password",
   "include_schemas_in_destination_stream_name": true,
-  "fastsync_batch_rows": 100000,
-  "dry_run_record_limit": 10
+  "fastsync_batch_rows": 100000, # optional configuration
+  "dry_run_record_limit": 10 # optional configuration
 }
 ```
 
