@@ -57,12 +57,6 @@ def write_dataframe_record(row, catalog_entry, stream_version, columns, table_st
 
     singer.write_message(record_message)
 
-def escape_special_chars(val):
-    if isinstance(val, str):
-        return val.replace('\n', '\\n').replace('\r', '\\r').replace('\t', '\\t')
-    else:
-        return val
-    
 def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version):
     mssql_conn = get_azure_sql_engine(config)
     common.whitelist_bookmark_keys(
@@ -119,10 +113,6 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
             filename = gen_export_filename(table=table_stream)
             filepath = os.path.join('fastsync', filename)
             
-
-
-            # Apply the function to each cell in the DataFrame
-            #chunk_dataframe = chunk_dataframe.applymap(escape_special_chars)
             chunk_dataframe.replace({'\\\\': r'\\\\'}, regex=True, inplace=True)
             chunk_dataframe.to_csv(f'{filepath}', sep=',', encoding='utf-8', index=False, header=False, compression='gzip')
             
