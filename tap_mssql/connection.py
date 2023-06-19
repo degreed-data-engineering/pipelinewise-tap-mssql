@@ -42,13 +42,27 @@ def decode_sketchy_utf16(raw_bytes):
         pass
     return s
 
+def modify_output_converter(conn):
+    # Store the previous converters in a dictionary
+    prev_converters = {
+        pyodbc.SQL_WVARCHAR: conn.connection.get_output_converter(pyodbc.SQL_WVARCHAR),
+        pyodbc.SQL_VARCHAR: conn.connection.get_output_converter(pyodbc.SQL_VARCHAR),
+        pyodbc.SQL_CHAR: conn.connection.get_output_converter(pyodbc.SQL_CHAR),
+    }
 
-def modify_ouput_converter(conn):
-
-    prev_converter = conn.connection.get_output_converter(pyodbc.SQL_WVARCHAR)
+    # Add new output converters
     conn.connection.add_output_converter(pyodbc.SQL_WVARCHAR, decode_sketchy_utf16)
+    conn.connection.add_output_converter(pyodbc.SQL_VARCHAR, decode_sketchy_utf16)
+    conn.connection.add_output_converter(pyodbc.SQL_CHAR, decode_sketchy_utf16)
 
-    return prev_converter
+    return prev_converters
+
+# def modify_ouput_converter(conn):
+
+#     prev_converter = conn.connection.get_output_converter(pyodbc.SQL_WVARCHAR)
+#     conn.connection.add_output_converter(pyodbc.SQL_WVARCHAR, decode_sketchy_utf16)
+
+#     return prev_converter
 
 
 def revert_ouput_converter(conn, prev_converter):
