@@ -122,8 +122,8 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
 
 
             # Apply the function to each cell in the DataFrame
-            chunk_dataframe = chunk_dataframe.applymap(escape_special_chars)
-            # chunk_dataframe.replace({'\\\\': r'\\\\'}, regex=True, inplace=True)
+            #chunk_dataframe = chunk_dataframe.applymap(escape_special_chars)
+            chunk_dataframe.replace({'\\\\': r'\\\\'}, regex=True, inplace=True)
             chunk_dataframe.to_csv(f'{filepath}', sep=',', encoding='utf-8', index=False, header=False, compression='gzip')
             
             files.append(filename) 
