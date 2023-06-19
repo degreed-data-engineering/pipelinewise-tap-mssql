@@ -65,8 +65,13 @@ def modify_ouput_converter(conn):
 #     return prev_converter
 
 
-def revert_ouput_converter(conn, prev_converter):
-    conn.connection.add_output_converter(pyodbc.SQL_WVARCHAR, prev_converter)
+# def revert_ouput_converter(conn, prev_converter):
+#     conn.connection.add_output_converter(pyodbc.SQL_WVARCHAR, prev_converter)
+
+def revert_ouput_converter(conn, prev_converters):
+    conn.connection.add_output_converter(pyodbc.SQL_WVARCHAR, prev_converters[pyodbc.SQL_WVARCHAR])
+    conn.connection.add_output_converter(pyodbc.SQL_VARCHAR, prev_converters[pyodbc.SQL_VARCHAR])
+    conn.connection.add_output_converter(pyodbc.SQL_CHAR, prev_converters[pyodbc.SQL_CHAR])
 
 
 def get_azure_sql_engine(config) -> Engine:
