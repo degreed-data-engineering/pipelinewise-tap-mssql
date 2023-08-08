@@ -85,18 +85,15 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
     ):
         singer.write_message(activate_version_message)
 
-    with mssql_conn.connect() as open_conn:
+    with mssql_conn.connect().execution_options(stream_results=True) as open_conn:
         LOGGER.info("Generating select_sql")
 
         params = {}
 
-        # if catalog_entry.tap_stream_id == "dbo-InputMetadata":
-        #     LOGGER.info("##PR TRYING TO MODIFY OUTPUT CONVERTER")
-        #     prev_converter = modify_ouput_converter(open_conn)
+        if catalog_entry.tap_stream_id == "dbo-InputMetadata":
+            prev_converter = modify_ouput_converter(open_conn)
 
         columns.sort()
-        LOGGER.info('##PR columns:')
-        LOGGER.info(columns)
         select_sql = common.fast_sync_generate_select_sql(catalog_entry, columns)
 
         columns.extend(['_SDC_EXTRACTED_AT','_SDC_DELETED_AT','_SDC_BATCHED_AT'])
@@ -104,16 +101,9 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
         query_df = df = pd.DataFrame(columns=columns) #TODO: delete?
         time_extracted = utils.now() #TODO: delete?
 
-        conn = mssql_conn.connect().execution_options(stream_results=True)
-
-        if catalog_entry.tap_stream_id == "dbo-InputMetadata":
-            LOGGER.info("##PR TRYING TO MODIFY OUTPUT CONVERTER")
-            prev_converter = modify_ouput_converter(conn)
-        csv_saved = 0
-
         chunk_size = config.get("fastsync_batch_rows") #TODO: update this so that its not required (if not set, fastsync disabled)
         files = []
-        for chunk_dataframe in pd.read_sql(select_sql, conn, chunksize=chunk_size):
+        for chunk_dataframe in pd.read_sql(select_sql, open_conn, chunksize=chunk_size):
             csv_saved += 1
 
             filename = gen_export_filename(table=table_stream)
@@ -132,7 +122,7 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
         sys.stdout.flush()
 
         if catalog_entry.tap_stream_id == "dbo-InputMetadata":
-            revert_ouput_converter(conn, prev_converter)
+            revert_ouput_converter(open_conn, prev_converter)
 
     # clear max pk value and last pk fetched upon successful sync
     singer.clear_bookmark(state, catalog_entry.tap_stream_id, "max_pk_values")
