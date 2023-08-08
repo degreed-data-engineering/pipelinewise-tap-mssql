@@ -100,9 +100,10 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
 
         query_df = df = pd.DataFrame(columns=columns) #TODO: delete?
         time_extracted = utils.now() #TODO: delete?
-
+        
         chunk_size = config.get("fastsync_batch_rows") #TODO: update this so that its not required (if not set, fastsync disabled)
         files = []
+        csv_saved = 0
         for chunk_dataframe in pd.read_sql(select_sql, open_conn, chunksize=chunk_size):
             csv_saved += 1
 
