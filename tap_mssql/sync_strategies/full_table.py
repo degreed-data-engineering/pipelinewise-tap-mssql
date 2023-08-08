@@ -91,9 +91,12 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
         params = {}
 
         # if catalog_entry.tap_stream_id == "dbo-InputMetadata":
+        #     LOGGER.info("##PR TRYING TO MODIFY OUTPUT CONVERTER")
         #     prev_converter = modify_ouput_converter(open_conn)
 
         columns.sort()
+        LOGGER.info('##PR columns:')
+        LOGGER.info(columns)
         select_sql = common.fast_sync_generate_select_sql(catalog_entry, columns)
 
         columns.extend(['_SDC_EXTRACTED_AT','_SDC_DELETED_AT','_SDC_BATCHED_AT'])
@@ -103,6 +106,9 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
 
         conn = mssql_conn.connect().execution_options(stream_results=True)
 
+        if catalog_entry.tap_stream_id == "dbo-InputMetadata":
+            LOGGER.info("##PR TRYING TO MODIFY OUTPUT CONVERTER")
+            prev_converter = modify_ouput_converter(conn)
         csv_saved = 0
 
         chunk_size = config.get("fastsync_batch_rows") #TODO: update this so that its not required (if not set, fastsync disabled)
@@ -125,8 +131,8 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
         sys.stdout.write(str(json_object) + '\n')
         sys.stdout.flush()
 
-        # if catalog_entry.tap_stream_id == "dbo-InputMetadata":
-        #     revert_ouput_converter(open_conn, prev_converter)
+        if catalog_entry.tap_stream_id == "dbo-InputMetadata":
+            revert_ouput_converter(conn, prev_converter)
 
     # clear max pk value and last pk fetched upon successful sync
     singer.clear_bookmark(state, catalog_entry.tap_stream_id, "max_pk_values")
