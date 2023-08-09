@@ -85,7 +85,7 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
     ):
         singer.write_message(activate_version_message)
 
-    with mssql_conn.connect().execution_options(stream_results=True) as open_conn:
+    with mssql_conn.connect() as open_conn:
         LOGGER.info("Generating select_sql")
 
         params = {}
@@ -101,10 +101,14 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
         query_df = df = pd.DataFrame(columns=columns) #TODO: delete?
         time_extracted = utils.now() #TODO: delete?
         
+        conn = mssql_conn.connect().execution_options(stream_results=True)
+
+        csv_saved = 0
+
         chunk_size = config.get("fastsync_batch_rows") #TODO: update this so that its not required (if not set, fastsync disabled)
         files = []
-        csv_saved = 0
-        for chunk_dataframe in pd.read_sql(select_sql, open_conn, chunksize=chunk_size):
+        
+        for chunk_dataframe in pd.read_sql(select_sql, conn, chunksize=chunk_size):
             csv_saved += 1
 
             filename = gen_export_filename(table=table_stream)
