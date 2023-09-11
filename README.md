@@ -68,7 +68,8 @@ Create a config file containing the database connection credentials, e.g.:
   "user": "root",
   "password": "password",
   "include_schemas_in_destination_stream_name": true,
-  "fastsync_batch_rows": 100000
+  "fastsync_batch_rows": 100000, # optional configuration
+  "dry_run_record_limit": 10 # optional configuration
 }
 ```
 
@@ -300,6 +301,9 @@ new and changed records that have been recorded by SQL Server Change Tracking ea
 ## FastSync
 
 Any Full Table replication, or initial full sync for a Log Based extract, will use FasySync, an altertative method that bypasses the singer spec, sepcifically the RECORD row, in order to decrease duration times. Defining a value for the config fastsync_batch_rows will set the batch number of records synced at a time for each table. 
+
+## dry_run_record_limit
+By setting a number for dry_run_record_limit, any stream synced will be limited to the defined number.  This can be used for testing new tables for change tracking or validating data before syncing the entire dataset.
 
 #### Examples
 

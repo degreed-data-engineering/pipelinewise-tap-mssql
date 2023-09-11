@@ -94,7 +94,8 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
             prev_converter = modify_ouput_converter(open_conn)
 
         columns.sort()
-        select_sql = common.fast_sync_generate_select_sql(catalog_entry, columns)
+        dry_run_limit = config.get("dry_run_limit")
+        select_sql = common.fast_sync_generate_select_sql(catalog_entry, columns, dry_run_limit)
 
         columns.extend(['_SDC_EXTRACTED_AT','_SDC_DELETED_AT','_SDC_BATCHED_AT'])
 
