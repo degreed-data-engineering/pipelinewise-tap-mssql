@@ -61,23 +61,24 @@ class log_based_sync:
     ):  # do this the first time only as required? future change for now
         self.logger.info("Validate the database for change tracking")
 
-        sql_query = (
-            "SELECT DB_NAME(database_id) AS db_name FROM sys.change_tracking_databases"
-        )
+        # sql_query = (
+        #     "SELECT DB_NAME(database_id) AS db_name FROM sys.change_tracking_databases"
+        # )
 
-        database_is_change_tracking_enabled = False
+        # database_is_change_tracking_enabled = False
 
-        with self.mssql_conn.connect() as open_conn:
-            results = open_conn.execute(sql_query)
-            row = results.fetchone()
+        # with self.mssql_conn.connect() as open_conn:
+        #     results = open_conn.execute(sql_query)
+        #     row = results.fetchone()
 
-            if row["db_name"] == self.database_name:
-                database_is_change_tracking_enabled = True
-            else:
-                raise Exception(
-                    "Cannot sync stream using log-based replication. Change tracking is not enabled for database: {}".format(self.database_name)
-                )
+        #     if row["db_name"] == self.database_name:
+        #         database_is_change_tracking_enabled = True
+        #     else:
+        #         raise Exception(
+        #             "Cannot sync stream using log-based replication. Change tracking is not enabled for database: {}".format(self.database_name)
+        #         )
 
+        self.logger.info("HELLO WORLD we need saving")
         return True
 
     def _get_change_tracking_tables(self):  # do this the first time only as required?
