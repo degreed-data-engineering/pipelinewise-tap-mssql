@@ -78,7 +78,7 @@ class log_based_sync:
                     "Cannot sync stream using log-based replication. Change tracking is not enabled for database: {}".format(self.database_name)
                 )
 
-        return database_is_change_tracking_enabled
+        return True #Hardcoding to True for now to avoid failover issues.
 
     def _get_change_tracking_tables(self):  # do this the first time only as required?
 
