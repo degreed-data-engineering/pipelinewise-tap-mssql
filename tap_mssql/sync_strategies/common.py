@@ -119,11 +119,11 @@ def fast_sync_generate_select_sql(catalog_entry, columns, dry_run_limit):
     _sdc_batched_at = f"'{time_extracted}' as _SDC_BATCHED_AT"
     _sdc_loaded_at = f"'{CURRENT_UTC_TIMESTAMP}' as _SDC_LOADED_AT" 
     if dry_run_limit:
-        select_sql = """SELECT TOP {} {}, {}, {}, {} FROM {}.{}""".format(
+        select_sql = """SELECT TOP {} {}, {}, {}, {}, {} FROM {}.{}""".format(
             dry_run_limit, ",".join(escaped_columns), _sdc_extracted_at, _sdc_deleted_at, _sdc_batched_at, _sdc_loaded_at, escaped_db, escaped_table
         )
     else:
-        select_sql = """SELECT {}, {}, {}, {} FROM {}.{}""".format(
+        select_sql = """SELECT {}, {}, {}, {}, {} FROM {}.{}""".format(
             ",".join(escaped_columns), _sdc_extracted_at, _sdc_deleted_at, _sdc_batched_at, _sdc_loaded_at, escaped_db, escaped_table
         )
 
