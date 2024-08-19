@@ -13,7 +13,7 @@ from singer import utils
 
 LOGGER = singer.get_logger()
 
-CURRENT_UTC_TIMESTAMP = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+CURRENT_UTC_TIMESTAMP = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
 
 def escape(string):
     if "`" in string:
