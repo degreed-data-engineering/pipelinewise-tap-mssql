@@ -75,7 +75,9 @@ class log_based_sync:
                 database_is_change_tracking_enabled = True
             else:
                 raise Exception(
-                    "Cannot sync stream using log-based replication. Change tracking is not enabled for database: {}".format(self.database_name)
+                    "Cannot sync stream using log-based replication. Change tracking is not enabled for database: {}".format(
+                        self.database_name
+                    )
                 )
 
         return database_is_change_tracking_enabled
@@ -234,6 +236,8 @@ class log_based_sync:
 
             if self.catalog_entry.tap_stream_id == "dbo-InputMetadata":
                 prev_converter = modify_ouput_converter(open_conn)
+            if self.catalog_entry.tap_stream_id == "learn-CollectionTrees":
+                prev_converter = modify_ouput_converter(open_conn)
 
             results = open_conn.execute(ct_sql_query)
 
@@ -244,7 +248,7 @@ class log_based_sync:
                 counter.tags["database"] = self.database_name
                 counter.tags["table"] = self.table_name
 
-                rows_updated = False # Checks to see if there are any new records.  If not then records state below
+                rows_updated = False  # Checks to see if there are any new records.  If not then records state below
 
                 while row:
                     rows_updated = True
@@ -298,12 +302,14 @@ class log_based_sync:
                     # do more
                     row = results.fetchone()
 
-                if not rows_updated: # updates the state if no new records have been added
+                if (
+                    not rows_updated
+                ):  # updates the state if no new records have been added
                     self.state = singer.write_bookmark(
                         self.state,
                         self.catalog_entry.tap_stream_id,
                         "current_log_version",
-                        run_current_log_version, # current log version before min version is pulled
+                        run_current_log_version,  # current log version before min version is pulled
                     )
 
             singer.write_message(singer.StateMessage(value=copy.deepcopy(self.state)))
