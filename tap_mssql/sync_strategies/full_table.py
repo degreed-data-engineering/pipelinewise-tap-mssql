@@ -91,6 +91,7 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
         params = {}
 
         if catalog_entry.tap_stream_id == "dbo-InputMetadata":
+
             prev_converter = modify_ouput_converter(open_conn)
 
         columns.sort()

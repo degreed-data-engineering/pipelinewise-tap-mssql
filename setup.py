@@ -18,7 +18,7 @@ setup(
         "pendulum==1.2.0",
         "singer-python==5.9.0",
         "sqlalchemy<2.0.0",
-        "pyodbc==4.0.26",
+        "pyodbc==4.0.39",
         "backoff==1.8.0",
         "MarkupSafe==2.0.1",
         "jinja2==2.11.3",
