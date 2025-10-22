@@ -125,7 +125,6 @@ def schema_for_column(c):
 
     elif data_type in DATETIME_TYPES:
         result.type = ["null", "string"]
-        # result.format = "date-time"
         if data_type == "time":
             result.format = "time"
         else:
