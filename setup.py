@@ -23,7 +23,7 @@ setup(
         "MarkupSafe==2.0.1",
         "jinja2==3.1.5",
         "pandas==1.2.2",
-        'numpy<1.21.0',
+        "numpy>=1.19.0,<1.21.0",
     ],
     entry_points="""
           [console_scripts]
