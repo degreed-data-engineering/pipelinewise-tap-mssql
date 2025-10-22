@@ -149,8 +149,8 @@ def row_to_singer_record(
         elif isinstance(elem, datetime.date):
             row_to_persist += (elem.isoformat() + "T00:00:00+00:00",)
 
-        elif isinstance(elem, datetime.time):
-            row_to_persist += (elem.isoformat(),)
+        # elif isinstance(elem, datetime.time):
+        #     row_to_persist += (elem.isoformat(),)
 
         elif isinstance(elem, datetime.timedelta):
             epoch = datetime.datetime.utcfromtimestamp(0)
