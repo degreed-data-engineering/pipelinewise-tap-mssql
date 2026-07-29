@@ -219,6 +219,10 @@ def sync_query(
     time_extracted = utils.now()
     if len(params) == 0:
         results = cursor.execute(select_sql)
+    elif "replication_key_value" in params and "end_replication_key_value" in params:
+        results = cursor.execute(select_sql, (params["replication_key_value"], params["end_replication_key_value"]))
+    elif "end_replication_key_value" in params:
+        results = cursor.execute(select_sql, params["end_replication_key_value"])
     else:
         results = cursor.execute(select_sql, params["replication_key_value"])
     row = results.fetchone()

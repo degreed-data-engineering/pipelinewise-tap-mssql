@@ -62,19 +62,47 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns):
         select_sql = common.generate_select_sql(catalog_entry, columns, dry_run_limit)
         params = {}
 
-        if replication_key_value is not None:
-            if (
-                catalog_entry.schema.properties[replication_key_metadata].format
-                == "date-time"
-            ):
-                replication_key_value = pendulum.parse(replication_key_value)
+        start_replication_key_value = config.get("start_replication_key_value")
+        end_replication_key_value = config.get("end_replication_key_value")
 
-            select_sql += ' WHERE "{}" >= ? ORDER BY "{}" ASC'.format(
-                replication_key_metadata, replication_key_metadata
+        is_datetime_key = (
+            catalog_entry.schema.properties[replication_key_metadata].format == "date-time"
+        ) if replication_key_metadata else False
+
+        # Use config start value when state has no bookmark (first run of a range partition).
+        # Config values arrive as strings from env vars — cast non-datetime keys to int.
+        if replication_key_value is None and start_replication_key_value is not None:
+            replication_key_value = (
+                start_replication_key_value
+                if is_datetime_key
+                else int(start_replication_key_value)
             )
 
+        if replication_key_value is not None:
+            if is_datetime_key:
+                replication_key_value = pendulum.parse(replication_key_value)
+
+            select_sql += ' WHERE "{}" >= ?'.format(replication_key_metadata)
             params["replication_key_value"] = replication_key_value
+
+            if end_replication_key_value is not None:
+                select_sql += ' AND "{}" <= ?'.format(replication_key_metadata)
+                params["end_replication_key_value"] = (
+                    pendulum.parse(end_replication_key_value)
+                    if is_datetime_key
+                    else int(end_replication_key_value)
+                )
+
+            select_sql += ' ORDER BY "{}" ASC'.format(replication_key_metadata)
         elif replication_key_metadata is not None:
+            if end_replication_key_value is not None:
+                select_sql += ' WHERE "{}" <= ?'.format(replication_key_metadata)
+                params["end_replication_key_value"] = (
+                    pendulum.parse(end_replication_key_value)
+                    if is_datetime_key
+                    else int(end_replication_key_value)
+                )
+
             select_sql += ' ORDER BY "{}" ASC'.format(replication_key_metadata)
 
         common.sync_query(
