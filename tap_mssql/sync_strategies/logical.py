@@ -339,16 +339,16 @@ class log_based_sync:
                 ,c.sys_change_operation
                 ,tc.commit_time
                 {% for property in key_properties %}
-                ,c.[{{ property }}]
+                ,c.{{ property }}
                 {% endfor %}
                 {% for column in selected_columns %}
-                ,st.[{{ column }}]
+                ,st.{{ column }}
                 {% endfor %}
             from CHANGETABLE (CHANGES {{ schema_name }}.{{ table_name }}, {{ current_log_version }}) as c
                 LEFT JOIN {{ schema_name }}.{{ table_name }} as st ON (
                     1 = 1
                     {% for property in key_properties %}
-                    AND c.[{{ property }}] = st.[{{ property }}]
+                    AND c.{{ property }} = st.{{ property }}
                     {% endfor %}
                 )
                 LEFT JOIN sys.dm_tran_commit_table tc ON (
@@ -358,10 +358,12 @@ class log_based_sync:
             """
         )
 
+        # Quote identifiers the same way the full-table path does (common.escape)
+        # so columns named after T-SQL reserved words (e.g. FreeText) are valid.
         return sql_template.render(
             {
-                "key_properties": key_properties,
-                "selected_columns": selected_columns,
+                "key_properties": [common.escape(k) for k in key_properties],
+                "selected_columns": [common.escape(c) for c in selected_columns],
                 "schema_name": self.schema_name,
                 "table_name": self.table_name,
                 "current_log_version": self.current_log_version - 1,
