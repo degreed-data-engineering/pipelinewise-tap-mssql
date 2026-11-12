@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name="pipelinewise-tap-mssql",
-    version="1.0.3",
+    version="1.1.0",
     description="Singer.io tap for extracting data from SQL Server - PipelineWise compatible",
     author="Stitch",
     url="https://github.com/wintersrd/pipelinewise-tap-mssql",
@@ -16,14 +16,14 @@ setup(
     install_requires=[
         "attrs==16.3.0",
         "pendulum==1.2.0",
-        "singer-python==5.9.0",
+        "singer-python==5.13.2",
         "sqlalchemy<2.0.0",
-        "pyodbc==4.0.26",
-        "backoff==1.8.0",
+        "pyodbc>=4.0.35,<6",
+        "backoff==1.10.0",
         "MarkupSafe==2.0.1",
         "jinja2==3.1.5",
-        "pandas==1.2.2",
-        "numpy>=1.19.0,<1.21.0",
+        "pandas>=1.5,<2.2",
+        "numpy>=1.23.2,<2",
     ],
     entry_points="""
           [console_scripts]
