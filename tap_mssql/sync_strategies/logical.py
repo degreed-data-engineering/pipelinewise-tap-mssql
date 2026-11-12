@@ -339,16 +339,16 @@ class log_based_sync:
                 ,c.sys_change_operation
                 ,tc.commit_time
                 {% for property in key_properties %}
-                ,c.{{ property }}
+                ,c.[{{ property }}]
                 {% endfor %}
                 {% for column in selected_columns %}
-                ,st.{{ column }}
+                ,st.[{{ column }}]
                 {% endfor %}
             from CHANGETABLE (CHANGES {{ schema_name }}.{{ table_name }}, {{ current_log_version }}) as c
                 LEFT JOIN {{ schema_name }}.{{ table_name }} as st ON (
                     1 = 1
                     {% for property in key_properties %}
-                    AND c.{{ property }} = st.{{ property }}
+                    AND c.[{{ property }}] = st.[{{ property }}]
                     {% endfor %}
                 )
                 LEFT JOIN sys.dm_tran_commit_table tc ON (
