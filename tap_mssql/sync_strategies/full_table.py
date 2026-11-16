@@ -109,6 +109,12 @@ def sync_table(mssql_conn, config, catalog_entry, state, columns, stream_version
         files = []
         
         for chunk_dataframe in pd.read_sql(select_sql, open_conn, chunksize=chunk_size):
+            # pandas yields one empty chunk for an empty table. Writing it would create a zero-line fastsync file,
+            # which makes target-snowflake fail ("UnboundLocalError: i" in persist_lines). Skip it so FASTSYNC
+            # carries no file for that stream; the stream is still activated and its bookmark still set below.
+            if chunk_dataframe.empty:
+                continue
+
             csv_saved += 1
 
             filename = gen_export_filename(table=table_stream)
