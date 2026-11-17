@@ -358,10 +358,12 @@ class log_based_sync:
             """
         )
 
+        # Quote identifiers the same way the full-table path does (common.escape)
+        # so columns named after T-SQL reserved words (e.g. FreeText) are valid.
         return sql_template.render(
             {
-                "key_properties": key_properties,
-                "selected_columns": selected_columns,
+                "key_properties": [common.escape(k) for k in key_properties],
+                "selected_columns": [common.escape(c) for c in selected_columns],
                 "schema_name": self.schema_name,
                 "table_name": self.table_name,
                 "current_log_version": self.current_log_version - 1,
